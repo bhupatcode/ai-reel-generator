@@ -92,18 +92,19 @@ class ReelController extends Controller
                     'music' => $reel->music,
                 ],
             ]);
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             $reel->update(['status' => 'failed']);
 
             Log::error('Reel generation failed', [
                 'reel_id' => $reel->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to generate reel: ' . $e->getMessage(),
+                'message' => 'Reel generation failed: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

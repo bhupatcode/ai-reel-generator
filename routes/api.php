@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReelController;
+use App\Http\Controllers\ReelProductionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,7 +27,17 @@ Route::middleware('api')->group(function () {
 
     // Reel endpoints
     Route::post('/reels/generate', [ReelController::class, 'generate'])->name('api.reels.generate');
+    Route::post('/reels/process', [ReelProductionController::class, 'process'])->name('api.reels.process');
+
+    // Video creation (Replicate async)
+    Route::post('/reels/create-video', [\App\Http\Controllers\VideoReelController::class, 'createVideo'])->name('api.reels.create-video');
+
+    // Check video generation status
+    Route::get('/reels/video-status/{predictionId}', [\App\Http\Controllers\VideoReelController::class, 'checkVideoStatus'])->name('api.reels.video-status');
+
+    // Reel management
     Route::get('/reels/{id}', [ReelController::class, 'show'])->name('api.reels.show');
-    Route::get('/reels', [ReelController::class, 'index'])->name('api.reels.list');
+    Route::get('/reels', [\App\Http\Controllers\VideoReelController::class, 'list'])->name('api.reels.list');
+    Route::delete('/reels/{id}', [\App\Http\Controllers\VideoReelController::class, 'delete'])->name('api.reels.delete');
 });
 

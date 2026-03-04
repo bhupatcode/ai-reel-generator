@@ -19,8 +19,10 @@ class Reel extends Model
         'scenes',
         'captions',
         'music',
+        'video_path',
         'raw_response',
         'status',
+        'prediction_id',
     ];
 
     /**

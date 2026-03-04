@@ -1016,6 +1016,24 @@
                                     New Reel
                                 </button>
                             </div>
+
+                            <!-- Paste existing JSON to generate video -->
+                            <div class="card mt-4">
+                                <div class="card-header">Create Video from JSON</div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="reelJson" class="form-label">Reel JSON</label>
+                                        <textarea id="reelJson" class="form-control" rows="6"
+                                                  placeholder='{"script":[], "scenes":[], "captions":[], "music":"", "duration":15}'></textarea>
+                                    </div>
+                                    <button id="generateVideoBtn" class="btn btn-success">
+                                        <i class="bi bi-film"></i> Generate Video
+                                    </button>
+                                    <span id="jsonLoader" class="spinner-border text-success ms-2" style="display:none;"></span>
+                                    <div id="generatedVideo" class="mt-3"></div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -1231,7 +1249,136 @@
             $('#topic-char-count').text('0 / 200');
             hideAlert();
         });
-    });
-    </script>
-</body>
+
+        // ── Generate Video From JSON (with Replicate async polling) ──
+        $('#generateVideoBtn').on('click', function () {
+            var raw = $('#reelJson').val().trim();
+            if (!raw) {
+                alert('Please paste the reel JSON first.');
+                return;
+            }
+
+            var payload;
+            try {
+                payload = JSON.parse(raw);
+            } catch (e) {
+                alert('Invalid JSON: ' + e.message);
+                return;
+            }
+
+            payload.duration = payload.duration || 15;
+
+            $('#jsonLoader').show();
+            $('#generatedVideo').empty();
+
+            // Step 1: Submit video generation request
+            $.ajax({
+                url: '/api/reels/create-video',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: JSON.stringify(payload),
+                success: function(res) {
+                    if (res.success && res.prediction_id) {
+                        console.log('Video generation started. Prediction ID:', res.prediction_id);
+                        // Step 2: Start polling for status
+                        pollVideoStatus(res.prediction_id);
+                    } else {
+                        $('#jsonLoader').hide();
+                        $('#generatedVideo').html('<div class="alert alert-danger">Failed to start video generation: ' + (res.error || 'Unknown error') + '</div>');
+                    }
+                },
+                error: function(xhr) {
+                    $('#jsonLoader').hide();
+                    var errorMsg = 'Error starting video generation';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMsg = xhr.responseJSON.error;
+                    }
+                    $('#generatedVideo').html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                }
+            });
+        });
+
+        // ── Poll video generation status every 5 seconds ──
+        let pollInterval = null;
+        let pollAttempts = 0;
+        const maxPollAttempts = 240; // 20 minutes (240 * 5 seconds)
+
+        function pollVideoStatus(predictionId) {
+            pollAttempts = 0;
+
+            function checkStatus() {
+                pollAttempts++;
+
+                if (pollAttempts > maxPollAttempts) {
+                    clearInterval(pollInterval);
+                    $('#jsonLoader').hide();
+                    $('#generatedVideo').html('<div class="alert alert-warning">Video generation timed out (20+ minutes). Please check back later.</div>');
+                    return;
+                }
+
+                // Update loading text with poll count
+                var displayMinutes = Math.floor((pollAttempts * 5) / 60);
+                var displaySeconds = (pollAttempts * 5) % 60;
+                var timeStr = (displayMinutes > 0 ? displayMinutes + 'm ' : '') + displaySeconds + 's';
+
+                $('#jsonLoader').html(
+                    '<div style="text-align: center;"><div class="spinner-border text-info mb-3" role="status"></div>' +
+                    '<div class="loader-text">Generating video<span class="dot-animation"></span></div>' +
+                    '<small style="color: var(--text-secondary);">Elapsed: ' + timeStr + '</small></div>'
+                );
+
+                $.ajax({
+                    url: '/api/reels/video-status/' + predictionId,
+                    type: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(res) {
+                        console.log('Status check:', res);
+
+                        if (res.status === 'completed' && res.video_url) {
+                            clearInterval(pollInterval);
+                            $('#jsonLoader').hide();
+
+                            // Display the generated video
+                            var html = '<video width="100%" controls autoplay muted style="border-radius: 12px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);">' +
+                                       '<source src="' + res.video_url + '" type="video/mp4">' +
+                                       'Your browser does not support the video tag.' +
+                                       '</video>';
+                            $('#generatedVideo').html(html);
+
+                            // Show success alert
+                            showAlert('success', 'Video generated successfully! It took ' + timeStr + '.');
+                        }
+                        else if (res.status === 'failed' || res.error) {
+                            clearInterval(pollInterval);
+                            $('#jsonLoader').hide();
+                            $('#generatedVideo').html('<div class="alert alert-danger">Video generation failed: ' + (res.error || 'Unknown error') + '</div>');
+                        }
+                        // If still processing, next poll will happen automatically
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 500) {
+                            clearInterval(pollInterval);
+                            $('#jsonLoader').hide();
+                            var errorMsg = 'Error checking status';
+                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                errorMsg = xhr.responseJSON.error;
+                            }
+                            $('#generatedVideo').html('<div class="alert alert-danger">' + errorMsg + '</div>');
+                        }
+                        // Otherwise continue polling
+                    }
+                });
+            }
+
+            // First check immediately
+            checkStatus();
+
+            // Then poll every 5 seconds
+            pollInterval = setInterval(checkStatus, 5000);
+        }
 </html>
