@@ -1,0 +1,157 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "AI Reel Generator API",
+  "dateExport": "2026-03-04T15:10:00Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "_id": "folder_reel_operations",
+      "name": "Reel Operations",
+      "containerId": "",
+      "created": "2026-03-04T15:10:00Z",
+      "sortNum": 10000
+    },
+    {
+      "_id": "folder_system",
+      "name": "System",
+      "containerId": "",
+      "created": "2026-03-04T15:10:00Z",
+      "sortNum": 20000
+    }
+  ],
+  "requests": [
+    {
+      "_id": "req_test_api",
+      "collectionId": "col_default",
+      "containerId": "folder_system",
+      "name": "01. Test API Status",
+      "url": "http://localhost:8000/api/test",
+      "method": "GET",
+      "sortNum": 10000,
+      "created": "2026-03-04T15:10:00Z",
+      "modified": "2026-03-04T15:10:00Z",
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "none"
+      },
+      "tests": [],
+      "docs": "Quick health check to verify API is running correctly."
+    },
+    {
+      "_id": "req_list_reels",
+      "collectionId": "col_default",
+      "containerId": "folder_reel_operations",
+      "name": "02. List All Reels",
+      "url": "http://localhost:8000/api/reels",
+      "method": "GET",
+      "sortNum": 20000,
+      "created": "2026-03-04T15:10:00Z",
+      "modified": "2026-03-04T15:10:00Z",
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "none"
+      },
+      "tests": [],
+      "docs": "Retrieve a paginated list of all generated reels from the database."
+    },
+    {
+      "_id": "req_get_reel",
+      "collectionId": "col_default",
+      "containerId": "folder_reel_operations",
+      "name": "03. Get Reel by ID",
+      "url": "http://localhost:8000/api/reels/1",
+      "method": "GET",
+      "sortNum": 30000,
+      "created": "2026-03-04T15:10:00Z",
+      "modified": "2026-03-04T15:10:00Z",
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "none"
+      },
+      "tests": [],
+      "docs": "Get detailed information about a specific reel by its ID. Change the ID in the URL to retrieve different reels."
+    },
+    {
+      "_id": "req_generate_reel_sample1",
+      "collectionId": "col_default",
+      "containerId": "folder_reel_operations",
+      "name": "04. Generate Reel - Food",
+      "url": "http://localhost:8000/api/reels/generate",
+      "method": "POST",
+      "sortNum": 40000,
+      "created": "2026-03-04T15:10:00Z",
+      "modified": "2026-03-04T15:10:00Z",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\"topic\": \"How to make Indian Biryani at Home\", \"mood\": \"Happy and Energetic\", \"duration\": 30}"
+      },
+      "tests": [],
+      "docs": "Generate a new reel about food with a happy, energetic mood. This will create AI-generated script, scenes, captions, and music suggestions."
+    },
+    {
+      "_id": "req_generate_reel_sample2",
+      "collectionId": "col_default",
+      "containerId": "folder_reel_operations",
+      "name": "05. Generate Reel - Education",
+      "url": "http://localhost:8000/api/reels/generate",
+      "method": "POST",
+      "sortNum": 50000,
+      "created": "2026-03-04T15:10:00Z",
+      "modified": "2026-03-04T15:10:00Z",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\"topic\": \"Learn Python Programming for Beginners\", \"mood\": \"Professional and Informative\", \"duration\": 60}"
+      },
+      "tests": [],
+      "docs": "Generate an educational reel about Python programming with a professional tone."
+    },
+    {
+      "_id": "req_generate_reel_sample3",
+      "collectionId": "col_default",
+      "containerId": "folder_reel_operations",
+      "name": "06. Generate Reel - Entertainment",
+      "url": "http://localhost:8000/api/reels/generate",
+      "method": "POST",
+      "sortNum": 60000,
+      "created": "2026-03-04T15:10:00Z",
+      "modified": "2026-03-04T15:10:00Z",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json",
+          "disabled": false
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\"topic\": \"Epic Fails Compilation\", \"mood\": \"Funny and Hilarious\", \"duration\": 15}"
+      },
+      "tests": [],
+      "docs": "Generate an entertainment reel with a funny mood. This creates a shorter 15-second reel."
+    }
+  ],
+  "variables": {
+    "base_url": "http://localhost:8000",
+    "api_base": "http://localhost:8000/api"
+  }
+}

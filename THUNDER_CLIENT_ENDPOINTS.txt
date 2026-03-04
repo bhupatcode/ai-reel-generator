@@ -1,0 +1,269 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                 🌩️  THUNDER CLIENT - ENDPOINTS CHEAT SHEET 🌩️               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ REQUEST #1: TEST API STATUS                                                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ NAME:     01. Test API Status                                                │
+│ METHOD:   GET                                                                │
+│ URL:      http://localhost:8000/api/test                                     │
+│ HEADERS:  (None - leave empty)                                               │
+│ BODY:     (None - leave empty)                                               │
+│                                                                              │
+│ EXPECTED RESPONSE:                                                           │
+│ {                                                                            │
+│   "success": true,                                                           │
+│   "message": "API is working!",                                              │
+│   "timestamp": "2026-03-04T09:38:20.278108Z"                                │
+│ }                                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ REQUEST #2: LIST ALL REELS                                                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ NAME:     02. List All Reels                                                 │
+│ METHOD:   GET                                                                │
+│ URL:      http://localhost:8000/api/reels                                    │
+│ HEADERS:  (None - leave empty)                                               │
+│ BODY:     (None - leave empty)                                               │
+│                                                                              │
+│ EXPECTED RESPONSE:                                                           │
+│ {                                                                            │
+│   "success": true,                                                           │
+│   "data": [                                                                  │
+│     {                                                                        │
+│       "id": 1,                                                               │
+│       "topic": "Indian Biryani",                                             │
+│       "mood": "Happy and Energetic",                                         │
+│       "duration": 30,                                                        │
+│       "status": "completed",                                                 │
+│       "created_at": "2026-03-04T09:09:34.000000Z"                            │
+│     }                                                                        │
+│   ]                                                                          │
+│ }                                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ REQUEST #3: GET REEL BY ID                                                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ NAME:     03. Get Reel by ID                                                 │
+│ METHOD:   GET                                                                │
+│ URL:      http://localhost:8000/api/reels/1                                  │
+│ HEADERS:  (None - leave empty)                       (Change 1 to other ID) │
+│ BODY:     (None - leave empty)                                               │
+│                                                                              │
+│ EXPECTED RESPONSE:                                                           │
+│ {                                                                            │
+│   "success": true,                                                           │
+│   "data": {                                                                  │
+│     "id": 1,                                                                 │
+│     "topic": "Indian Biryani",                                               │
+│     "mood": "Happy and Energetic",                                           │
+│     "duration": 30,                                                          │
+│     "script": [                                                              │
+│       "Welcome to cooking show!",                                            │
+│       "Today we'll make biryani",                                            │
+│       "Prepare your ingredients",                                            │
+│       "Mix and cook together",                                               │
+│       "Enjoy your delicious biryani"                                         │
+│     ],                                                                       │
+│     "scenes": ["Show ingredients", "Explain steps", ...],                    │
+│     "captions": ["Welcome", "Ingredients", ...],                             │
+│     "music": "Upbeat Indian instrumental",                                   │
+│     "status": "completed"                                                    │
+│   }                                                                          │
+│ }                                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ REQUEST #4: GENERATE REEL - FOOD 🍕                                          │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ NAME:     04. Generate Reel - Food                                           │
+│ METHOD:   POST                                                               │
+│ URL:      http://localhost:8000/api/reels/generate                           │
+│                                                                              │
+│ HEADERS: (Add this header)                                                   │
+│ ┌────────────────────────────────────────────────────────────────────────┐  │
+│ │ Header Name:  Content-Type                                             │  │
+│ │ Header Value: application/json                                         │  │
+│ └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│ BODY: (Send as JSON - copy exactly)                                         │
+│ ┌────────────────────────────────────────────────────────────────────────┐  │
+│ │{                                                                        │  │
+│ │  "topic": "How to make Indian Biryani at Home",                        │  │
+│ │  "mood": "Happy and Energetic",                                        │  │
+│ │  "duration": 30                                                        │  │
+│ │}                                                                        │  │
+│ └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│ WAIT: ~13 seconds for AI processing                                         │
+│                                                                              │
+│ EXPECTED RESPONSE:                                                           │
+│ {                                                                            │
+│   "success": true,                                                           │
+│   "message": "Reel generated successfully",                                  │
+│   "data": {                                                                  │
+│     "id": 4,                                                                 │
+│     "topic": "How to make Indian Biryani at Home",                           │
+│     "mood": "Happy and Energetic",                                           │
+│     "duration": 30,                                                          │
+│     "status": "completed",                                                   │
+│     "script": [...],                                                         │
+│     "scenes": [...],                                                         │
+│     "captions": [...],                                                       │
+│     "music": "Upbeat instrumentals"                                          │
+│   }                                                                          │
+│ }                                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ REQUEST #5: GENERATE REEL - EDUCATION 🎓                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ NAME:     05. Generate Reel - Education                                      │
+│ METHOD:   POST                                                               │
+│ URL:      http://localhost:8000/api/reels/generate                           │
+│                                                                              │
+│ HEADERS:                                                                     │
+│ ┌────────────────────────────────────────────────────────────────────────┐  │
+│ │ Header Name:  Content-Type                                             │  │
+│ │ Header Value: application/json                                         │  │
+│ └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│ BODY:                                                                        │
+│ ┌────────────────────────────────────────────────────────────────────────┐  │
+│ │{                                                                        │  │
+│ │  "topic": "Learn Python Programming for Beginners",                    │  │
+│ │  "mood": "Professional and Informative",                               │  │
+│ │  "duration": 60                                                        │  │
+│ │}                                                                        │  │
+│ └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│ WAIT: ~13 seconds for AI processing                                         │
+│                                                                              │
+│ RESPONSE: Same format as Food reel above ↑                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ REQUEST #6: GENERATE REEL - ENTERTAINMENT 😂                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ NAME:     06. Generate Reel - Entertainment                                  │
+│ METHOD:   POST                                                               │
+│ URL:      http://localhost:8000/api/reels/generate                           │
+│                                                                              │
+│ HEADERS:                                                                     │
+│ ┌────────────────────────────────────────────────────────────────────────┐  │
+│ │ Header Name:  Content-Type                                             │  │
+│ │ Header Value: application/json                                         │  │
+│ └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│ BODY:                                                                        │
+│ ┌────────────────────────────────────────────────────────────────────────┐  │
+│ │{                                                                        │  │
+│ │  "topic": "Funny Pet Videos Compilation",                              │  │
+│ │  "mood": "Funny and Hilarious",                                        │  │
+│ │  "duration": 15                                                        │  │
+│ │}                                                                        │  │
+│ └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│ WAIT: ~13 seconds for AI processing                                         │
+│                                                                              │
+│ RESPONSE: Same format as Food reel above ↑                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 POST REQUEST BODY EXAMPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+COPY ANY OF THESE INTO THE BODY SECTION OF A POST REQUEST:
+
+🍕 Cooking:
+{
+  "topic": "How to make Samosas - Quick Recipe",
+  "mood": "Happy and Entertaining",
+  "duration": 30
+}
+
+✈️ Travel:
+{
+  "topic": "Top 10 Best Beaches in Goa",
+  "mood": "Relaxing and Tropical",
+  "duration": 60
+}
+
+🏋️ Fitness:
+{
+  "topic": "10 Minute Full Body Workout",
+  "mood": "Motivational and Energetic",
+  "duration": 15
+}
+
+💻 Technology:
+{
+  "topic": "Latest AI Technology Trends 2026",
+  "mood": "Professional and Educational",
+  "duration": 60
+}
+
+🎨 DIY:
+{
+  "topic": "Easy Home Decoration DIY Ideas",
+  "mood": "Creative and Fun",
+  "duration": 30
+}
+
+🎵 Music:
+{
+  "topic": "How to Learn Guitar for Beginners",
+  "mood": "Inspiring and Fun",
+  "duration": 60
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️  VALID DURATION VALUES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+15 ✅ (15 seconds - Short reel)
+30 ✅ (30 seconds - Standard)
+60 ✅ (1 minute - Medium)
+90 ✅ (1.5 minutes - Long)
+
+Any other number will give error!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+😊 VALID MOOD EXAMPLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Happy and Energetic
+Fun and Entertaining
+Funny and Hilarious
+Professional and Serious
+Educational and Informative
+Relaxing and Calm
+Motivational and Inspiring
+Exciting and Dramatic
+Sad and Emotional
+Mysterious and Suspenseful
+Relaxing and Tropical
+Creative and Fun
+Appetizing and Delicious
+
+(Any mood works - these are just suggestions!)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ QUICK STEPS IN THUNDER CLIENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open Thunder Client
+2. Click "Collections" (left side)
+3. Click "Import"
+4. Select: ThunderClient_Collection.json
+5. Click on any request in the sidebar
+6. Click "Send" button (blue button at top)
+7. Wait for response on right side
+8. For POST requests, wait ~13 seconds for AI processing
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+That's it! You now have everything you need to test the API in Thunder Client! 🚀

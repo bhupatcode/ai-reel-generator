@@ -1,0 +1,82 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "AI Reel Generator API",
+  "dateExport": "2026-03-04T15:08:00.000Z",
+  "version": "1.1",
+  "folders": [],
+  "requests": [
+    {
+      "_id": "test-api",
+      "colId": "default",
+      "name": "Test API",
+      "method": "GET",
+      "url": "http://localhost:8000/api/test",
+      "sortNum": 10000,
+      "created": "2026-03-04T15:08:00.000Z",
+      "modified": "2026-03-04T15:08:00.000Z",
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": ""
+      },
+      "tests": []
+    },
+    {
+      "_id": "list-reels",
+      "colId": "default",
+      "name": "List All Reels",
+      "method": "GET",
+      "url": "http://localhost:8000/api/reels",
+      "sortNum": 20000,
+      "created": "2026-03-04T15:08:00.000Z",
+      "modified": "2026-03-04T15:08:00.000Z",
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": ""
+      },
+      "tests": []
+    },
+    {
+      "_id": "generate-reel",
+      "colId": "default",
+      "name": "Generate New Reel",
+      "method": "POST",
+      "url": "http://localhost:8000/api/reels/generate",
+      "sortNum": 30000,
+      "created": "2026-03-04T15:08:00.000Z",
+      "modified": "2026-03-04T15:08:00.000Z",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"topic\": \"How to make delicious biryani\",\n  \"mood\": \"Happy and Energetic\",\n  \"duration\": 30\n}"
+      },
+      "tests": []
+    },
+    {
+      "_id": "get-reel",
+      "colId": "default",
+      "name": "Get Reel by ID",
+      "method": "GET",
+      "url": "http://localhost:8000/api/reels/1",
+      "sortNum": 40000,
+      "created": "2026-03-04T15:08:00.000Z",
+      "modified": "2026-03-04T15:08:00.000Z",
+      "headers": [],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": ""
+      },
+      "tests": []
+    }
+  ]
+}
