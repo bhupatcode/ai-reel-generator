@@ -822,7 +822,39 @@
                     <i class="bi bi-camera-reels-fill"></i>
                     ReelForge AI
                 </a>
-                <span class="nav-badge">Beta</span>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="nav-badge">Beta</span>
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="color: var(--text-primary);">
+                            <div class="rounded-circle overflow-hidden d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; background: var(--gradient-button) !important;">
+                                @if(Auth::user()->profile_image)
+                                    <img src="{{ asset(Auth::user()->profile_image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                @else
+                                    <i class="bi bi-person-fill text-white"></i>
+                                @endif
+                            </div>
+                            <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow border-0" style="background: var(--bg-card); border-radius: 12px; margin-top: 10px; padding: 8px;">
+                            <li>
+                                <a href="{{ route('profile') }}" class="dropdown-item d-flex align-items-center gap-2 py-2 mb-1" style="border-radius: 8px;">
+                                    <i class="bi bi-person-circle text-primary"></i>
+                                    <span>Profile</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider opacity-10"></li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST" id="logout-form">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item d-flex align-items-center gap-2 py-2" style="border-radius: 8px;">
+                                        <i class="bi bi-box-arrow-right text-danger"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -1381,4 +1413,6 @@
             // Then poll every 5 seconds
             pollInterval = setInterval(checkStatus, 5000);
         }
+    </script>
+</body>
 </html>
