@@ -6,6 +6,8 @@
     <meta name="description" content="AI Reel Generator - Create stunning short-form video reels powered by artificial intelligence. Choose your topic, mood, and duration to generate engaging content.">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AI Reel Generator — Create Stunning Reels Instantly</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
