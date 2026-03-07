@@ -11,6 +11,7 @@ class ImageGenerationService
     public function generateFromPrompt(string $prompt): string
     {
         // placeholder implementation: in real scenario, call HTTP client
+        // test by developer
         // to huggingface API and return response body (binary or base64)
         // for now just return an empty transparent PNG
         $transparent = base64_encode(
