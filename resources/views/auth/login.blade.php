@@ -1,213 +1,356 @@
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AI Reel Generator</title>
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- AOS Animate on Scroll -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+@extends('layouts.frontend')
+
+@section('title', 'Login')
+
+@section('styles')
     <style>
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #16161f;
-            --border-color: rgba(255, 255, 255, 0.06);
-            --text-primary: #f0f0f5;
-            --text-secondary: #8b8b9e;
-            --accent-purple: #8b5cf6;
-            --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #06b6d4 100%);
-            --gradient-button: linear-gradient(135deg, #8b5cf6, #6d3fd4);
+            --auth-bg-dark: #020617;
+            --auth-accent: #6366f1;
+            --auth-accent-glow: rgba(99, 102, 241, 0.4);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+        /* Override main content to be full width/height for auth */
+        main {
+            padding: 0 !important;
             min-height: 100vh;
+            display: flex;
+            background: var(--auth-bg-dark);
+            overflow: hidden;
+        }
+
+        .auth-split-layout {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* Left Side: Visual/Branding */
+        .auth-visual-side {
+            flex: 1.2;
+            position: relative;
+            background: linear-gradient(rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.8)), url('{{ asset('assets/images/landing_hero.png') }}');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px;
+            color: white;
+            overflow: hidden;
+        }
+
+        .auth-visual-side::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at center, transparent 0%, var(--auth-bg-dark) 100%);
+            opacity: 0.6;
+        }
+
+        .visual-content {
+            position: relative;
+            z-index: 2;
+            max-width: 500px;
+        }
+
+        .visual-content h2 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+        }
+
+        .visual-content p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .stat-item h4 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--auth-accent);
+            margin-bottom: 4px;
+        }
+
+        .stat-item span {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Right Side: Form */
+        .auth-form-side {
+            flex: 1;
+            background: var(--auth-bg-dark);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
+            padding: 60px;
+            position: relative;
         }
 
-        .bg-grid {
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            z-index: -1;
-        }
-
-        .glass-card {
-            background: rgba(22, 22, 31, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 3rem;
+        .form-card {
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 420px;
+            animation: fadeInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .brand-logo {
-            font-family: 'Space Grotesk', sans-serif;
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .form-card h3 {
+            font-size: 2.25rem;
             font-weight: 700;
-            font-size: 2rem;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            margin-bottom: 2rem;
-            display: block;
-            text-decoration: none;
-        }
-
-        .form-label {
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            padding: 0.8rem 1.2rem;
-        }
-
-        .form-control:focus {
-            background: var(--bg-card);
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-            color: var(--text-primary);
-        }
-
-        .btn-auth {
-            background: var(--gradient-button);
-            border: none;
-            border-radius: 12px;
+            margin-bottom: 12px;
             color: white;
+        }
+
+        .form-card p {
+            color: var(--text-dim);
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
             font-weight: 600;
-            padding: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .input-wrapper input {
             width: 100%;
-            margin-top: 1rem;
-            transition: transform 0.2s;
+            padding: 16px 20px 16px 52px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
-        .btn-auth:hover {
+        .input-wrapper input:focus {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: var(--auth-accent);
+            box-shadow: 0 0 0 4px var(--auth-accent-glow);
+            outline: none;
+        }
+
+        .input-wrapper input:focus + i {
+            color: var(--auth-accent);
+        }
+
+        .btn-premium {
+            width: 100%;
+            padding: 16px;
+            background: var(--auth-accent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+            margin-top: 10px;
+        }
+
+        .btn-premium:hover {
             transform: translateY(-2px);
-            opacity: 0.9;
+            background: #4f46e5;
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3);
         }
 
-        .auth-footer {
+        .auth-links {
             text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-secondary);
+            margin-top: 32px;
+            color: var(--text-dim);
+            font-size: 0.95rem;
         }
 
-        .auth-footer a {
-            color: var(--accent-purple);
+        .auth-links a {
+            color: var(--auth-accent);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
+        }
+
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            margin-top: 10px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: var(--auth-accent);
+        }
+
+        /* Floating particles background */
+        .particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @media (max-width: 992px) {
+            .auth-visual-side { display: none; }
+            .auth-form-side { flex: 1; padding: 40px 20px; }
         }
     </style>
-</head>
-<body>
-    <div class="bg-grid"></div>
-    
-    <div class="glass-card" data-aos="fade-up">
-        <a href="/" class="brand-logo"><i class="bi bi-film"></i> AI Reels</a>
-        <h3 class="text-center mb-4">Welcome Back</h3>
+@endsection
 
-        @if (session('status'))
-            <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-20 text-success rounded-3 mb-4 small">
-                <i class="bi bi-check-circle-fill me-2"></i> {{ session('status') }}
-            </div>
-        @endif
-
-
-        <form method="POST" action="{{ route('login') }}" id="loginForm">
-            @csrf
-            <div class="mb-3">
-                <label class="form-label">Email Address</label>
-                <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required autofocus>
-                @error('email')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label mb-0">Password</label>
-                    <a href="{{ route('password.request') }}" class="small text-decoration-none" style="color: var(--accent-purple);">Forgot?</a>
+@section('content')
+    <div class="auth-split-layout">
+        {{-- Left: Visual Side --}}
+        <div class="auth-visual-side">
+            <div class="visual-content reveal">
+                <h2>Scale your vision <br> with <span class="gradient-text">Gemini AI</span></h2>
+                <p>Join over 10,000+ creators who are automating their video content and growing 10x faster using our professional AI tools.</p>
+                
+                <div class="stat-grid">
+                    <div class="stat-item reveal delay-1">
+                        <h4>1M+</h4>
+                        <span>Reels Created</span>
+                    </div>
+                    <div class="stat-item reveal delay-2">
+                        <h4>98%</h4>
+                        <span>Satisfaction</span>
+                    </div>
                 </div>
-                <input type="password" name="password" id="password" class="form-control" required>
             </div>
-            <button type="submit" class="btn-auth">Sign In</button>
-        </form>
+        </div>
 
-        <div class="auth-footer">
-            Don't have an account? <a href="{{ route('register') }}">Create one</a>
+        {{-- Right: Form Side --}}
+        <div class="auth-form-side">
+            <div class="form-card">
+                <div style="margin-bottom: 40px; display: inline-block;">
+                    <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; background: var(--auth-accent); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m3 9 18-1"/><path d="m3 15 18-1"/></svg>
+                        </div>
+                        <span style="font-size: 1.5rem; font-weight: 800; color: white; letter-spacing: -1px;">AI REELS</span>
+                    </a>
+                </div>
+
+                <h3>Welcome back</h3>
+                <p>Please enter your details to access your dashboard.</p>
+
+                @if (session('status'))
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #10b981; padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login') }}" id="loginForm">
+                    @csrf
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus placeholder="Enter your email">
+                            <i class="bi bi-envelope-at" style="pointer-events: none;"></i>
+                        </div>
+                        @error('email')
+                            <span style="color: #f43f5e; font-size: 0.8rem; margin-top: 8px; display: block;">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" name="password" required placeholder="••••••••">
+                            <i class="bi bi-shield-lock" style="pointer-events: none;"></i>
+                            <i class="bi bi-eye toggle-password" style="position: absolute; right: 20px; left: auto; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-dim); z-index: 10;"></i>
+                        </div>
+                        @error('password')
+                            <span style="color: #f43f5e; font-size: 0.8rem; margin-top: 8px; display: block;">{{ $message }}</span>
+                        @enderror
+                        <a href="{{ route('password.request') }}" class="forgot-password">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-premium">Sign In</button>
+                </form>
+
+                <div class="auth-links">
+                    Don't have an account? <a href="{{ route('register') }}">Create an account</a>
+                </div>
+            </div>
         </div>
     </div>
+@endsection
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init();
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script>
+    document.querySelector('nav').style.display = 'none';
+    document.querySelector('footer').style.display = 'none';
 
-        $(document).ready(function() {
-            $("#loginForm").validate({
-                rules: {
-                    email: {
-                        required: true,
-                        email: true
-                    },
-                    password: {
-                        required: true
-                    }
-                },
-                messages: {
-                    email: {
-                        required: "Please enter your email",
-                        email: "Please enter a valid email address"
-                    },
-                    password: {
-                        required: "Please enter your password"
-                    }
-                },
-                errorElement: 'span',
-                errorPlacement: function (error, element) {
-                    error.addClass('invalid-feedback');
-                    element.closest('.mb-3').append(error);
-                },
-                highlight: function (element, errorClass, validClass) {
-                    $(element).addClass('is-invalid');
-                },
-                unhighlight: function (element, errorClass, validClass) {
-                    $(element).removeClass('is-invalid');
-                },
-                submitHandler: function(form) {
-                    const btn = $(form).find('button[type="submit"]');
-                    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...');
-                    form.submit();
-                }
-            });
+    $(document).ready(function() {
+        $("#loginForm").validate({
+            rules: {
+                email: { required: true, email: true },
+                password: { required: true }
+            },
+            messages: {
+                email: "Please enter a valid email address",
+                password: "Please enter your password"
+            },
+            errorElement: 'span',
+            errorPlacement: function(error, element) {
+                error.css({ 'color': '#f43f5e', 'font-size': '0.8rem', 'margin-top': '8px', 'display': 'block' });
+                element.parent().parent().append(error);
+            }
         });
-    </script>
-</body>
-</html>
+
+        // Toggle Password visibility
+        $('.toggle-password').on('click', function() {
+            const input = $(this).siblings('input');
+            const type = input.attr('type') === 'password' ? 'text' : 'password';
+            input.attr('type', type);
+            $(this).toggleClass('bi-eye bi-eye-slash');
+        });
+    });
+</script>
+@endsection

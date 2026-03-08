@@ -1,271 +1,366 @@
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Register - AI Reel Generator</title>
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- AOS Animate on Scroll -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+@extends('layouts.frontend')
+
+@section('title', 'Register')
+
+@section('styles')
     <style>
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #16161f;
-            --border-color: rgba(255, 255, 255, 0.06);
-            --text-primary: #f0f0f5;
-            --text-secondary: #8b8b9e;
-            --accent-purple: #8b5cf6;
-            --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #06b6d4 100%);
-            --gradient-button: linear-gradient(135deg, #8b5cf6, #6d3fd4);
+            --auth-bg-dark: #020617;
+            --auth-accent: #6366f1;
+            --auth-accent-glow: rgba(99, 102, 241, 0.4);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
+        main {
+            padding: 0 !important;
             min-height: 100vh;
+            display: flex;
+            background: var(--auth-bg-dark);
+            overflow: hidden;
+        }
+
+        .auth-split-layout {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .auth-visual-side {
+            flex: 1.2;
+            position: relative;
+            background: linear-gradient(rgba(2, 6, 23, 0.4), rgba(2, 6, 23, 0.8)), url('{{ asset('assets/images/about_hero.png') }}');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 80px;
+            color: white;
+            overflow: hidden;
+        }
+
+        .auth-visual-side::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at center, transparent 0%, var(--auth-bg-dark) 100%);
+            opacity: 0.6;
+        }
+
+        .visual-content {
+            position: relative;
+            z-index: 2;
+            max-width: 500px;
+        }
+
+        .visual-content h2 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            letter-spacing: -2px;
+        }
+
+        .visual-content p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        /* Right Side: Form */
+        .auth-form-side {
+            flex: 1;
+            background: var(--auth-bg-dark);
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
+            padding: 60px;
+            overflow-y: auto;
         }
 
-        .bg-grid {
-            position: fixed;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            z-index: -1;
-        }
-
-        .glass-card {
-            background: rgba(22, 22, 31, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 3rem;
+        .form-card {
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 420px;
+            animation: fadeInRight 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 40px 0;
         }
 
-        .brand-logo {
-            font-family: 'Space Grotesk', sans-serif;
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .form-card h3 {
+            font-size: 2.25rem;
             font-weight: 700;
-            font-size: 2rem;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-align: center;
-            margin-bottom: 2rem;
-            display: block;
-            text-decoration: none;
-        }
-
-        .form-label {
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-control {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            padding: 0.8rem 1.2rem;
-        }
-
-        .form-control:focus {
-            background: var(--bg-card);
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-            color: var(--text-primary);
-        }
-
-        .btn-auth {
-            background: var(--gradient-button);
-            border: none;
-            border-radius: 12px;
+            margin-bottom: 12px;
             color: white;
+        }
+
+        .form-card p {
+            color: var(--text-dim);
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
             font-weight: 600;
-            padding: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            font-size: 1.1rem;
+        }
+
+        .input-wrapper input {
             width: 100%;
-            margin-top: 1rem;
-            transition: transform 0.2s;
+            padding: 16px 20px 16px 52px;
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
-        .btn-auth:hover {
+        .input-wrapper input:focus {
+            background: rgba(30, 41, 59, 0.5);
+            border-color: var(--auth-accent);
+            box-shadow: 0 0 0 4px var(--auth-accent-glow);
+            outline: none;
+        }
+
+        .btn-premium {
+            width: 100%;
+            padding: 16px;
+            background: var(--auth-accent);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+            margin-top: 10px;
+        }
+
+        .btn-premium:hover {
             transform: translateY(-2px);
-            opacity: 0.9;
+            background: #4f46e5;
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3);
         }
 
-        .auth-footer {
+        .auth-links {
             text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-secondary);
+            margin-top: 32px;
+            color: var(--text-dim);
+            font-size: 0.95rem;
         }
 
-        .auth-footer a {
-            color: var(--accent-purple);
+        .auth-links a {
+            color: var(--auth-accent);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
+        }
+
+        @media (max-width: 992px) {
+            .auth-visual-side { display: none; }
+            .auth-form-side { flex: 1; padding: 40px 20px; }
         }
     </style>
-</head>
-<body>
-    <div class="bg-grid"></div>
-    
-    <div class="glass-card" data-aos="fade-up">
-        <a href="/" class="brand-logo"><i class="bi bi-film"></i> AI Reels</a>
-        <h3 class="text-center mb-4">Join Us</h3>
+@endsection
 
-        <form method="POST" action="{{ route('register') }}" id="registerForm">
-            @csrf
-            <div class="mb-3">
-                <label class="form-label">Full Name</label>
-                <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" required autofocus>
-                @error('name')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                @enderror
+@section('content')
+    <div class="auth-split-layout">
+        {{-- Left: Visual Side --}}
+        <div class="auth-visual-side">
+            <div class="visual-content reveal">
+                <h2>Join the <br> <span class="gradient-text">Creator Revolution</span></h2>
+                <p>Start generating high-impact videos in seconds. Power your social media presence with the world's most advanced AI video tool.</p>
+                
+                <div style="display: flex; gap: 15px; margin-top: 40px;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1);">
+                        <i class="bi bi-play-fill" style="margin-left: 3px;"></i>
+                    </div>
+                    <div>
+                        <span style="display: block; font-weight: 700;">Instant Generation</span>
+                        <span style="color: rgba(255,255,255,0.5); font-size: 0.85rem;">Zero editing required</span>
+                    </div>
+                </div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Email Address</label>
-                <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
-                @error('email')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror" required>
-                @error('password')
-                    <span class="invalid-feedback">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Confirm Password</label>
-                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
-            </div>
-            <button type="submit" class="btn-auth">Sign Up</button>
-        </form>
+        </div>
 
+        {{-- Right: Form Side --}}
+        <div class="auth-form-side">
+            <div class="form-card">
+                <div style="margin-bottom: 40px; display: inline-block;">
+                    <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; background: var(--auth-accent); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m3 9 18-1"/><path d="m3 15 18-1"/></svg>
+                        </div>
+                        <span style="font-size: 1.5rem; font-weight: 800; color: white; letter-spacing: -1px;">AI REELS</span>
+                    </a>
+                </div>
 
-        <div class="auth-footer">
-            Already have an account? <a href="{{ route('login') }}">Login here</a>
+                <h3>Get Started</h3>
+                <p>Create your account and start your free trial today.</p>
+
+                <form method="POST" action="{{ route('register') }}" id="registerForm">
+                    @csrf
+                    <div class="input-group">
+                        <label for="name">Full Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus placeholder="John Doe">
+                            <i class="bi bi-person" style="pointer-events: none;"></i>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" name="email" value="{{ old('email') }}" required placeholder="name@example.com">
+                            <i class="bi bi-envelope" style="pointer-events: none;"></i>
+                            <div id="email-status" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: none;">
+                                <div class="spinner-border spinner-border-sm text-primary" id="email-loader" style="display: none;"></div>
+                                <i class="bi bi-check-circle-fill text-success" id="email-ok" style="display: none;"></i>
+                                <i class="bi bi-x-circle-fill text-danger" id="email-error" style="display: none;"></i>
+                            </div>
+                        </div>
+                        <span id="email-msg" style="font-size: 0.8rem; margin-top: 8px; display: block;"></span>
+                        @error('email')
+                            <span style="color: #f43f5e; font-size: 0.8rem; margin-top: 8px; display: block;">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="input-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label for="password">Password</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="password" name="password" required placeholder="••••••••">
+                                <i class="bi bi-shield-lock" style="pointer-events: none;"></i>
+                                <i class="bi bi-eye toggle-password" style="position: absolute; right: 15px; left: auto; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-dim); z-index: 10;"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="password_confirmation">Confirm</label>
+                            <div class="input-wrapper">
+                                <input type="password" id="password_confirmation" name="password_confirmation" required placeholder="••••••••">
+                                <i class="bi bi-shield-check" style="pointer-events: none;"></i>
+                                <i class="bi bi-eye toggle-password" style="position: absolute; right: 15px; left: auto; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-dim); z-index: 10;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    @error('password')
+                        <span style="color: #f43f5e; font-size: 0.8rem; margin-top: -10px; margin-bottom: 20px; display: block;">{{ $message }}</span>
+                    @enderror
+
+                    <button type="submit" class="btn-premium">Create Account</button>
+                </form>
+
+                <div class="auth-links">
+                    Already have an account? <a href="{{ route('login') }}">Sign In</a>
+                </div>
+            </div>
         </div>
     </div>
+@endsection
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    
-    <script>
-        AOS.init();
+@section('scripts')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script>
+    document.querySelector('nav').style.display = 'none';
+    document.querySelector('footer').style.display = 'none';
 
-        $(document).ready(function() {
-            // Setup CSRF for AJAX
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    $(document).ready(function() {
+        // Form Validation
+        const validator = $("#registerForm").validate({
+            rules: {
+                name: { required: true, minlength: 2 },
+                email: { required: true, email: true },
+                password: { required: true, minlength: 8 },
+                password_confirmation: { required: true, equalTo: "#password" }
+            },
+            messages: {
+                name: "Please enter your full name",
+                email: "Please enter a valid email address",
+                password: {
+                    required: "Please provide a password",
+                    minlength: "Password must be at least 8 characters long"
+                },
+                password_confirmation: {
+                    required: "Please confirm your password",
+                    equalTo: "Passwords do not match"
                 }
-            });
-
-            // Custom method for bad words (example check)
-            const badWords = ['badword1', 'badword2', 'spam', 'admin', 'root'];
-            $.validator.addMethod("nobadwords", function(value, element) {
-                const lowerValue = value.toLowerCase();
-                return !badWords.some(word => lowerValue.includes(word));
-            }, "Please avoid inappropriate language in your name.");
-
-            // jQuery Validation
-            $("#registerForm").validate({
-                rules: {
-                    name: {
-                        required: true,
-                        minlength: 2,
-                        nobadwords: true
-                    },
-                    email: {
-                        required: true,
-                        email: true,
-                        remote: {
-                            url: "{{ route('check.email') }}",
-                            type: "post",
-                            data: {
-                                email: function() {
-                                    return $("#email").val();
-                                }
-                            },
-                            dataFilter: function(data) {
-                                var json = JSON.parse(data);
-                                if (json.exists === true) {
-                                    return JSON.stringify("This email is already registered.");
-                                } else {
-                                    return JSON.stringify(true);
-                                }
-                            }
-                        }
-                    },
-                    password: {
-                        required: true,
-                        minlength: 8
-                    },
-                    password_confirmation: {
-                        required: true,
-                        equalTo: "#password"
-                    }
-                },
-                messages: {
-                    name: {
-                        required: "Please enter your name",
-                        minlength: "Name must be at least 2 characters"
-                    },
-                    email: {
-                        required: "Please enter your email",
-                        email: "Please enter a valid email address"
-                    },
-                    password: {
-                        required: "Please provide a password",
-                        minlength: "Your password must be at least 8 characters long"
-                    },
-                    password_confirmation: {
-                        required: "Please confirm your password",
-                        equalTo: "Passwords do not match"
-                    }
-                },
-                errorElement: 'span',
-                errorPlacement: function (error, element) {
-                    error.addClass('invalid-feedback');
-                    element.closest('.mb-3').append(error);
-                },
-                highlight: function (element, errorClass, validClass) {
-                    $(element).addClass('is-invalid');
-                },
-                unhighlight: function (element, errorClass, validClass) {
-                    $(element).removeClass('is-invalid');
-                },
-                submitHandler: function(form) {
-                    const btn = $(form).find('button[type="submit"]');
-                    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
-                    form.submit();
-                }
-            });
+            },
+            errorElement: 'span',
+            errorPlacement: function(error, element) {
+                error.css({ 'color': '#f43f5e', 'font-size': '0.8rem', 'margin-top': '8px', 'display': 'block' });
+                element.parent().parent().append(error);
+            }
         });
-    </script>
-</body>
-</html>
+
+        // Email AJAX Check
+        $('#email').on('blur', function() {
+            const email = $(this).val();
+            const statusBox = $('#email-status');
+            const loader = $('#email-loader');
+            const okIcon = $('#email-ok');
+            const errIcon = $('#email-error');
+            const msg = $('#email-msg');
+
+            if (email && validator.element('#email')) {
+                statusBox.show();
+                loader.show();
+                okIcon.hide();
+                errIcon.hide();
+                msg.hide();
+
+                $.post("{{ route('check.email') }}", {
+                    email: email,
+                    _token: "{{ csrf_token() }}"
+                }, function(data) {
+                    loader.hide();
+                    if (data.exists) {
+                        errIcon.show();
+                        msg.text('Email already registered!').css('color', '#f43f5e').show();
+                        $('#email').addClass('is-invalid');
+                    } else {
+                        okIcon.show();
+                        msg.text('Email available').css('color', '#10b981').show();
+                        $('#email').removeClass('is-invalid');
+                    }
+                });
+            } else {
+                statusBox.hide();
+            }
+        });
+
+        // Toggle Password visibility
+        $('.toggle-password').on('click', function() {
+            const input = $(this).siblings('input');
+            const type = input.attr('type') === 'password' ? 'text' : 'password';
+            input.attr('type', type);
+            $(this).toggleClass('bi-eye bi-eye-slash');
+        });
+    });
+</script>
+@endsection

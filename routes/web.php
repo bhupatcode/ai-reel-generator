@@ -5,6 +5,17 @@ use App\Http\Controllers\ReelController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ReviewController;
+
+Route::get('/', [LandingController::class , 'index'])->name('landing');
+Route::get('/about', [LandingController::class , 'about'])->name('about');
+Route::get('/reviews', [LandingController::class , 'reviews'])->name('reviews');
+Route::post('/reviews', [ReviewController::class , 'submit'])->name('reviews.submit');
+Route::get('/contact', [ContactController::class , 'show'])->name('contact');
+Route::post('/contact', [ContactController::class , 'submit'])->name('contact.submit');
+
 Route::get('/login', [AuthController::class , 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class , 'login']);
 Route::get('/register', [AuthController::class , 'showRegisterForm'])->name('register');
@@ -19,10 +30,10 @@ Route::get('/reset-password/{token}', [AuthController::class , 'showResetPasswor
 Route::post('/reset-password', [AuthController::class , 'resetPassword'])->name('password.update');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
+    Route::get('/dashboard', function () {
             return view('reel_form');
         }
-        );
+        )->name('dashboard');
         Route::get('/profile', [ProfileController::class , 'show'])->name('profile');
         Route::post('/profile', [ProfileController::class , 'update'])->name('profile.update');
         Route::post('/generate-reel', [ReelController::class , 'generate'])->name('generate.reel');
@@ -39,4 +50,5 @@ Route::middleware('auth')->group(function () {
                         return 'Email failed: ' . $e->getMessage();
                     }
                 }
-                );            });
+                );
+            });
