@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ReviewController;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', [LandingController::class , 'index'])->name('landing');
 Route::get('/about', [LandingController::class , 'about'])->name('about');
@@ -55,3 +56,8 @@ Route::middleware('auth')->group(function () {
                 }
                 );
             });
+
+Route::get('/clear-cache', function () {
+    Artisan::call('optimize:clear');
+    return "Cache cleared successfully!";
+});
