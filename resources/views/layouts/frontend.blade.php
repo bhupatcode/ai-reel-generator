@@ -300,15 +300,15 @@
                     <ul>
                         <li><a href="{{ url('/about') }}">About Us</a></li>
                         <li><a href="{{ url('/reviews') }}">Our Reviews</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="{{ url('/privacy') }}">Privacy Policy</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h4>Support</h4>
                     <ul>
                         <li><a href="{{ url('/contact') }}">Contact Us</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="{{ url('/faq') }}">FAQ</a></li>
+                        <li><a href="{{ url('/terms') }}">Terms of Service</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -327,7 +327,30 @@
     </footer>
 
     @yield('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Global Toast Utility
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            background: 'rgba(15, 23, 42, 0.9)',
+            color: '#f8fafc',
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        window.showToast = function(icon, title) {
+            Toast.fire({
+                icon: icon,
+                title: title
+            });
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             const observerOptions = {
                 threshold: 0.1
