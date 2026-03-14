@@ -2,14 +2,33 @@
 
 @section('title', 'About Us')
 
+@section('styles')
+    <style>
+        .about-grid {
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 60px; 
+            align-items: center; 
+            margin-bottom: 80px;
+        }
+        @media (max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                margin-bottom: 40px;
+            }
+        }
+    </style>
+@endsection
+
 @section('content')
-    <section class="container" style="padding-top: 180px;">
+    <section class="container">
         <div class="section-header reveal">
             <h2>Our Story</h2>
             <p>Empowering creators with the next generation of AI content tools.</p>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 80px;" class="reveal delay-1">
+        <div class="about-grid reveal delay-1">
             <div style="line-height: 1.8; color: var(--text-dim);">
                 <p style="margin-bottom: 30px;">
                     At ReelGenius AI, we believe that high-quality video content shouldn't be reserved for those with expensive equipment or advanced editing skills. Our mission is to democratize content creation by leveraging the power of Artificial Intelligence.

@@ -57,6 +57,19 @@
         .accordion-item.active .accordion-icon {
             transform: rotate(180deg);
         }
+
+        @media (max-width: 768px) {
+            .faq-section {
+                padding: 100px 0 60px;
+            }
+            .accordion-header {
+                padding: 20px;
+                font-size: 1rem;
+            }
+            .accordion-content {
+                padding: 0 20px 20px;
+            }
+        }
     </style>
 @endsection
 

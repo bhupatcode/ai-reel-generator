@@ -138,11 +138,24 @@
         }
 
         @media (max-width: 768px) {
+            .hero {
+                padding: 100px 0 60px;
+            }
             .hero h1 {
                 font-size: 2.5rem;
             }
-            .hero {
-                padding: 120px 0 60px;
+            .hero-btns {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .hero-btns .btn {
+                width: 100%;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .review-card {
+                min-width: 280px;
             }
         }
     </style>

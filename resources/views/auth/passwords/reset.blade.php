@@ -1,47 +1,24 @@
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - AI Reel Generator</title>
-    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- AOS Animate on Scroll -->
+@extends('layouts.frontend')
+
+@section('title', 'Set New Password')
+
+@section('styles')
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #16161f;
-            --border-color: rgba(255, 255, 255, 0.06);
-            --text-primary: #f0f0f5;
-            --text-secondary: #8b8b9e;
-            --accent-purple: #8b5cf6;
-            --gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #06b6d4 100%);
-            --gradient-button: linear-gradient(135deg, #8b5cf6, #6d3fd4);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-purple: #6366f1;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #f43f5e 50%, #06b6d4 100%);
+            --gradient-button: linear-gradient(135deg, #6366f1, #4f46e5);
         }
 
         .bg-grid {
-            position: fixed;
+            position: absolute;
             inset: 0;
             background-image:
                 linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
@@ -51,7 +28,7 @@
         }
 
         .glass-card {
-            background: rgba(22, 22, 31, 0.6);
+            background: var(--bg-card);
             backdrop-filter: blur(20px);
             border: 1px solid var(--border-color);
             border-radius: 20px;
@@ -59,6 +36,7 @@
             width: 100%;
             max-width: 450px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            margin: 0 auto;
         }
 
         .brand-logo {
@@ -70,14 +48,37 @@
             -webkit-text-fill-color: transparent;
             text-align: center;
             margin-bottom: 2rem;
-            display: block;
+            display: inline-block;
             text-decoration: none;
+        }
+
+        .header-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--text-primary);
         }
 
         .form-label {
             color: var(--text-secondary);
             font-weight: 500;
             margin-bottom: 0.5rem;
+            display: block;
+            margin-top: 1rem;
         }
 
         .form-control {
@@ -86,13 +87,15 @@
             border-radius: 12px;
             color: var(--text-primary);
             padding: 0.8rem 1.2rem;
+            width: 100%;
         }
 
         .form-control:focus {
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             border-color: var(--accent-purple);
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
             color: var(--text-primary);
+            outline: none;
         }
 
         .btn-auth {
@@ -103,7 +106,8 @@
             font-weight: 600;
             padding: 0.8rem;
             width: 100%;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
+            cursor: pointer;
             transition: transform 0.2s;
         }
 
@@ -111,17 +115,31 @@
             transform: translateY(-2px);
             opacity: 0.9;
         }
+
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 2rem 1.5rem;
+            }
+            .brand-logo {
+                font-size: 1.6rem;
+            }
+        }
     </style>
-</head>
-<body>
+@endsection
+
+@section('content')
+<div style="min-height: calc(100vh - 120px); display: flex; align-items: center; justify-content: center; padding: 120px 20px 60px; position: relative;">
     <div class="bg-grid"></div>
     
     <div class="glass-card" data-aos="fade-up">
-        <a href="/" class="brand-logo"><i class="bi bi-film"></i> AI Reels</a>
-        <h3 class="text-center mb-4">Set New Password</h3>
+        <div class="header-action">
+            <a href="javascript:history.length > 1 ? history.back() : window.location.href='{{ route('login') }}'" class="back-btn"><i class="bi bi-arrow-left-short"></i></a>
+            <a href="/" class="brand-logo mb-0"><i class="bi bi-film"></i> AI Reels</a>
+        </div>
+        <h3 class="text-center mb-4" style="text-align: center; margin-bottom: 1.5rem;">Set New Password</h3>
 
         @if (session('error'))
-            <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger rounded-3 mb-4">
+            <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-20 text-danger rounded-3 mb-4" style="background: rgba(244, 63, 94, 0.1); border: 1px solid #f43f5e; color: #f43f5e; padding: 10px; border-radius: 8px; margin-bottom: 20px;">
                 {{ session('error') }}
             </div>
         @endif
@@ -134,7 +152,7 @@
                 <label class="form-label">Email Address</label>
                 <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ $email ?? old('email') }}" required readonly>
                 @error('email')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback text-danger small" style="color: #f43f5e; font-size: 0.8rem; margin-top: 4px; display: block;">{{ $message }}</span>
                 @enderror
             </div>
 
@@ -142,7 +160,7 @@
                 <label class="form-label">New Password</label>
                 <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror" required autofocus>
                 @error('password')
-                    <span class="invalid-feedback">{{ $message }}</span>
+                    <span class="invalid-feedback text-danger small" style="color: #f43f5e; font-size: 0.8rem; margin-top: 4px; display: block;">{{ $message }}</span>
                 @enderror
             </div>
 
@@ -154,8 +172,10 @@
             <button type="submit" class="btn-auth">Reset Password</button>
         </form>
     </div>
+</div>
+@endsection
 
-    <!-- Scripts -->
+@section('scripts')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -173,18 +193,17 @@
                 },
                 errorElement: 'span',
                 errorPlacement: function (error, element) {
-                    error.addClass('invalid-feedback');
-                    element.closest('.mb-3').append(error);
+                    error.css({color: '#f43f5e', fontSize: '0.8rem', marginTop: '4px', display: 'block'});
+                    element.parent().append(error);
                 },
-                highlight: function (element) { $(element).addClass('is-invalid'); },
-                unhighlight: function (element) { $(element).removeClass('is-invalid'); },
+                highlight: function (element) { $(element).css('border-color', '#f43f5e'); },
+                unhighlight: function (element) { $(element).css('border-color', 'var(--border-color)'); },
                 submitHandler: function(form) {
                     const btn = $(form).find('button[type="submit"]');
-                    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+                    btn.prop('disabled', true).text('Processing...');
                     form.submit();
                 }
             });
         });
     </script>
-</body>
-</html>
+@endsection

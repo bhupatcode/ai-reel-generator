@@ -23,6 +23,7 @@
             display: flex;
             width: 100%;
             height: 100vh;
+            padding-top: 80px; /* Account for fixed navbar */
         }
 
         /* Left Side: Visual/Branding */
@@ -238,6 +239,19 @@
             .auth-visual-side { display: none; }
             .auth-form-side { flex: 1; padding: 40px 20px; }
         }
+
+        @media (max-width: 480px) {
+            .auth-form-side {
+                padding: 20px 15px;
+            }
+            .form-card h3 {
+                font-size: 1.8rem;
+            }
+            .form-card p {
+                font-size: 0.9rem;
+                margin-bottom: 30px;
+            }
+        }
     </style>
 @endsection
 
@@ -265,14 +279,21 @@
         {{-- Right: Form Side --}}
         <div class="auth-form-side">
             <div class="form-card">
-                <div style="margin-bottom: 40px; display: inline-block;">
-                    <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 40px; height: 40px; background: var(--auth-accent); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m3 9 18-1"/><path d="m3 15 18-1"/></svg>
+                <!-- <div style="margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between;">
+                    <a href="javascript:history.length > 1 ? history.back() : window.location.href='/'" style="text-decoration: none; display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-weight: 600; transition: color 0.3s ease;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-dim)'">
+                        <div style="width: 36px; height: 36px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                            <i class="bi bi-arrow-left" style="font-size: 1.2rem;"></i>
                         </div>
-                        <span style="font-size: 1.5rem; font-weight: 800; color: white; letter-spacing: -1px;">AI REELS</span>
+                        <span style="font-size: 0.95rem;">Back</span>
                     </a>
-                </div>
+
+                    <a href="/" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.2rem; font-weight: 800; color: white; letter-spacing: -0.5px;">AI REELS</span>
+                        <div style="width: 32px; height: 32px; background: var(--auth-accent); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m3 9 18-1"/><path d="m3 15 18-1"/></svg>
+                        </div>
+                    </a>
+                </div> -->
 
                 <h3>Welcome back</h3>
                 <p>Please enter your details to access your dashboard.</p>
@@ -324,9 +345,6 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 <script>
-    document.querySelector('nav').style.display = 'none';
-    document.querySelector('footer').style.display = 'none';
-
     $(document).ready(function() {
         $("#loginForm").validate({
             rules: {

@@ -306,6 +306,23 @@
             .form-grid { grid-template-columns: 1fr; }
             .generator-card { padding: 30px; }
         }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding-top: 100px;
+                padding-bottom: 60px;
+            }
+            .generator-header h2 {
+                font-size: 2rem;
+            }
+            .generator-card {
+                padding: 20px;
+                border-radius: 20px;
+            }
+            .form-grid { 
+                gap: 20px; 
+            }
+        }
     </style>
 @endsection
 

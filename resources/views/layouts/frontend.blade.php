@@ -101,6 +101,55 @@
             color: var(--text-light);
         }
 
+        /* Hamburger Menu Config */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(-20px);
+        }
+
+        .mobile-nav-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .mobile-nav-overlay a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .mobile-nav-overlay a:hover {
+            color: var(--primary);
+        }
+
         .btn {
             padding: 10px 24px;
             border-radius: 12px;
@@ -254,11 +303,24 @@
         }
 
         @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
             .nav-links {
-                display: none; /* Mobile menu logic omitted for brevity, focusing on premium look */
+                display: none;
             }
             .section-header h2 {
                 font-size: 2rem;
+            }
+            .container {
+                padding: 0 15px;
+            }
+            section {
+                padding: 60px 0 40px;
+            }
+            footer {
+                padding: 60px 0 30px;
+                margin-top: 60px;
             }
         }
 
@@ -268,7 +330,19 @@
 <body>
     <nav>
         <div class="container nav-content">
-            <a href="{{ url('/') }}" class="logo">ReelGenius AI</a>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                @if(request()->path() !== '/')
+                    <a href="javascript:history.length > 1 ? history.back() : window.location.href='/'" style="color: var(--text-dim); text-decoration: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; transition: all 0.3s ease;" onmouseover="this.style.color='white'; this.style.background='rgba(255,255,255,0.1)';" onmouseout="this.style.color='var(--text-dim)'; this.style.background='rgba(255,255,255,0.05)';">
+                        <i class="bi bi-arrow-left" style="font-size: 1.2rem;"></i>
+                    </a>
+                @endif
+                <a href="{{ url('/') }}" class="logo">ReelGenius AI</a>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="bi bi-list"></i>
+            </button>
+
             <div class="nav-links">
                 <a href="{{ url('/') }}">Home</a>
                 <a href="{{ url('/about') }}">About</a>
@@ -285,6 +359,22 @@
             </div>
         </div>
     </nav>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay">
+        <a href="{{ url('/') }}">Home</a>
+        <a href="{{ url('/about') }}">About</a>
+        <a href="{{ url('/reviews') }}">Reviews</a>
+        <a href="{{ url('/contact') }}">Contact</a>
+        @auth
+            <a href="{{ url('/dashboard') }}" class="btn btn-primary" style="margin-top: 20px;">Dashboard</a>
+        @else
+            <a href="{{ route('login') }}" class="btn btn-outline" style="margin-top: 20px;">Log in</a>
+            @if (Route::has('register'))
+                <a href="{{ route('register') }}" class="btn btn-primary">Get Started</a>
+            @endif
+        @endauth
+    </div>
 
     <main>
         @yield('content')
@@ -369,6 +459,37 @@
             document.querySelectorAll('.reveal').forEach(el => {
                 observer.observe(el);
             });
+
+            // Mobile Menu Toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+            
+            if (mobileMenuBtn && mobileNavOverlay) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileNavOverlay.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (mobileNavOverlay.classList.contains('active')) {
+                        icon.classList.remove('bi-list');
+                        icon.classList.add('bi-x');
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        icon.classList.remove('bi-x');
+                        icon.classList.add('bi-list');
+                        document.body.style.overflow = '';
+                    }
+                });
+
+                // Close menu when clicking a link
+                mobileNavOverlay.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileNavOverlay.classList.remove('active');
+                        const icon = mobileMenuBtn.querySelector('i');
+                        icon.classList.remove('bi-x');
+                        icon.classList.add('bi-list');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
         });
     </script>
 </body>

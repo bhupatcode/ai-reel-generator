@@ -99,11 +99,24 @@
             color: white;
             outline: none;
         }
+
+        @media (max-width: 768px) {
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+            .submission-section {
+                padding: 40px 15px;
+                border-radius: 20px;
+            }
+            .review-form {
+                padding: 24px;
+            }
+        }
     </style>
 @endsection
 
 @section('content')
-    <section class="container" style="padding-top: 180px;">
+    <section class="container">
         <div class="section-header">
             <h2>Community Reviews</h2>
             <p>See what creators around the world are saying about ReelGenius AI.</p>

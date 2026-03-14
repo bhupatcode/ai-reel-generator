@@ -75,11 +75,22 @@
             border-radius: 12px;
             margin-bottom: 20px;
         }
+
+        @media (max-width: 768px) {
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                padding-top: 30px;
+            }
+            .contact-form {
+                padding: 24px;
+            }
+        }
     </style>
 @endsection
 
 @section('content')
-    <section class="container" style="padding-top: 180px;">
+    <section class="container">
         <div class="section-header reveal">
             <h2>Get in Touch</h2>
             <p>Have questions about our AI tools? Our team is here to help.</p>
