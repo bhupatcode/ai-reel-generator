@@ -26,15 +26,16 @@ class OpenRouterService
         $prompt = $this->buildPrompt($topic, $mood, $duration);
 
         try {
-            $response = Http::withHeaders([
+            $response = Http::withoutVerifying()
+                ->withHeaders([
                 'Authorization' => "Bearer {$this->apiKey}",
                 'Content-Type' => 'application/json',
                 'HTTP-Referer' => 'https://ai-reel-generator.app',
             ])
-            ->timeout(60)
-            ->retry(2, 100)
-            ->post($this->endpoint, [
-                'model' => 'openai/gpt-3.5-turbo',  // Cheaper model, lower token usage
+                ->timeout(60)
+                ->retry(2, 100)
+                ->post($this->endpoint, [
+                'model' => 'openai/gpt-3.5-turbo', // Cheaper model, lower token usage
                 'messages' => [
                     [
                         'role' => 'user',
@@ -42,9 +43,10 @@ class OpenRouterService
                     ],
                 ],
                 'temperature' => 0.7,
-                'max_tokens' => 1500,  // Limit max tokens to reduce cost
+                'max_tokens' => 1500, // Limit max tokens to reduce cost
             ]);
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             Log::error('OpenRouter HTTP Error', [
                 'error' => $e->getMessage(),
             ]);

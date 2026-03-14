@@ -22,10 +22,10 @@ class VideoService
     public function __construct()
     {
         $this->replicateApiKey = config('services.replicate.api_key') 
-            ?? env('REPLICATE_API_KEY');
+            ?? env('REPLICATE_API_TOKEN');
         
         if (!$this->replicateApiKey) {
-            Log::error('VideoService: REPLICATE_API_KEY not configured');
+            Log::error('VideoService: REPLICATE_API_TOKEN not configured');
         }
     }
 
@@ -821,10 +821,10 @@ php artisan tinker
 
 ```bash
 # Verify API key is set
-grep REPLICATE_API_KEY .env
+grep REPLICATE_API_TOKEN .env
 
 # Should output:
-# REPLICATE_API_KEY=r8_N13EPP6q0vlKIgjStHF1Lcg4CdH4yYD0UrxER
+# REPLICATE_API_TOKEN=r8_N13EPP6q0vlKIgjStHF1Lcg4CdH4yYD0UrxER
 ```
 
 ---

@@ -20,7 +20,7 @@ php artisan config:clear && php artisan cache:clear
 ### 4. Verify Replicate API Key
 ```bash
 php artisan tinker
-echo env('REPLICATE_API_KEY');
+echo env('REPLICATE_API_TOKEN');
 exit
 ```
 
@@ -242,10 +242,10 @@ php artisan log:tail | grep -i "video\|replicate\|prediction"
 
 ## Common Issues & Fixes
 
-### Issue: "REPLICATE_API_KEY not configured"
+### Issue: "REPLICATE_API_TOKEN not configured"
 ```bash
 # Check .env
-grep REPLICATE_API_KEY .env
+grep REPLICATE_API_TOKEN .env
 
 # Should show key starting with r8_
 # If not, update with valid key from https://replicate.com/account
@@ -431,7 +431,7 @@ php -l app/Services/VideoService.php
 php -l app/Http/Controllers/VideoReelController.php
 
 # ✓ Replicate API key is set
-grep REPLICATE_API_KEY .env | head -1
+grep REPLICATE_API_TOKEN .env | head -1
 
 # ✓ Database migrations are created
 ls -la database/migrations/ | grep replicate

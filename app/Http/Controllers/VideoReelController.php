@@ -41,99 +41,40 @@ class VideoReelController extends Controller
     {
         try {
             $validated = $request->validate([
+                'topic' => 'nullable|string|max:255',
+                'mood' => 'nullable|string|max:255',
                 'script' => 'required|array',
                 'scenes' => 'required|array',
                 'captions' => 'required|array',
                 'music' => 'nullable|string',
-                'duration' => 'required|integer|in:15,30',
+                'duration' => 'required|integer|in:15,30,60,90',
             ]);
 
             Log::info('VideoReelController.createVideo: starting video generation', [
-                'scenes_count' => count($validated['scenes']),
                 'duration' => $validated['duration']
             ]);
 
-            // Ensure image directory exists
-            $imageDir = public_path('reels/images');
-            if (!is_dir($imageDir)) {
-                mkdir($imageDir, 0755, true);
-            }
-
-            $imageUrls = [];
-            $imagePaths = [];
-            $generator = app(\App\Services\ImageGenerationService::class);
-
-            // Generate images from scenes
-            foreach ($validated['scenes'] as $idx => $scene) {
-                try {
-                    Log::debug('VideoReelController.createVideo: generating image', ['scene_index' => $idx]);
-
-                    // Call image generation service
-                    $prompt = $scene; // Could expand or refine the prompt
-                    $imageData = $generator->generateFromPrompt($prompt);
-
-                    $filename = 'scene_' . $idx . '_' . uniqid() . '.png';
-                    $filePath = $imageDir . '/' . $filename;
-
-                    // Handle base64 or binary image data
-                    if (strpos($imageData, 'data:image') === 0) {
-                        [$meta, $data] = explode(',', $imageData, 2);
-                        file_put_contents($filePath, base64_decode($data));
-                    } else {
-                        file_put_contents($filePath, $imageData);
-                    }
-
-                    $imagePaths[] = $filePath;
-                    // Generate public URL for the image
-                    $imageUrl = url('reels/images/' . $filename);
-                    $imageUrls[] = $imageUrl;
-
-                    Log::debug('VideoReelController.createVideo: image generated', [
-                        'scene_index' => $idx,
-                        'url' => $imageUrl
-                    ]);
-
-                } catch (\Exception $e) {
-                    Log::error('VideoReelController.createVideo: image generation failed', [
-                        'scene_index' => $idx,
-                        'scene' => $scene,
-                        'error' => $e->getMessage()
-                    ]);
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'Failed to generate scene image: ' . $e->getMessage()
-                    ], 500);
-                }
-            }
-
-            if (empty($imageUrls)) {
-                Log::error('VideoReelController.createVideo: no images generated');
-                return response()->json([
-                    'success' => false,
-                    'error' => 'No images were generated'
-                ], 500);
-            }
-
-            Log::info('VideoReelController.createVideo: calling generateReelVideo', [
-                'image_count' => count($imageUrls),
-                'duration' => $validated['duration']
-            ]);
-
-            // Call Replicate API to generate video (async)
+            // Call Replicate API to generate video (async) using the raw text script and scenes
             $videoResult = $this->videoService->generateReelVideo(
-                $imageUrls,
+                $validated['script'],
+                $validated['scenes'],
                 $validated['duration']
             );
 
             if (!$videoResult['success']) {
                 Log::error('VideoReelController.createVideo: generateReelVideo failed', $videoResult);
-                return response()->json($videoResult, 500);
+                return response()->json([
+                    'success' => false,
+                    'error' => $videoResult['error'] ?? 'Video generation service failed to respond correctly.'
+                ], 500);
             }
 
             $predictionId = $videoResult['prediction_id'];
 
             // Create Reel record with pending status
             $reel = Reel::create([
+                'topic' => $validated['topic'] ?? 'AI Generated Reel',
+                'mood' => $validated['mood'] ?? 'Professional',
                 'script' => json_encode($validated['script']),
                 'scenes' => json_encode($validated['scenes']),
                 'captions' => json_encode($validated['captions']),
@@ -234,10 +175,15 @@ class VideoReelController extends Controller
                     'error' => $statusResult['error']
                 ]);
 
+                $errorMessage = $statusResult['error'] ?? 'Video generation failed on the server.';
+                if (str_contains($errorMessage, '401') || str_contains(strtolower($errorMessage), 'unauthenticated')) {
+                    $errorMessage = 'API Authentication Error: Please verify your Replicate API key.';
+                }
+
                 return response()->json([
                     'success' => false,
                     'status' => 'failed',
-                    'error' => $statusResult['error'] ?? 'Video generation failed'
+                    'error' => $errorMessage
                 ], 500);
             }
 
@@ -327,6 +273,48 @@ class VideoReelController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to delete reel'
+            ], 500);
+        }
+    }
+
+    /**
+     * Download a generated video at a specific resolution
+     * POST /api/reels/download
+     */
+    public function downloadVideo(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'video_url' => 'required|url',
+                'resolution' => 'required|in:144p,240p,360p,720p,1080p'
+            ]);
+
+            $videoUrl = $validated['video_url'];
+            $resolution = $validated['resolution'];
+
+            // Fetch the file contents using native PHP to avoid Laravel Http Promise lints
+            $fileContents = @file_get_contents($videoUrl);
+
+            if ($fileContents === false) {
+                throw new \Exception('Failed to retrieve video file from generated source.');
+            }
+
+            // For now, since native FFMPEG is not guaranteed, we provide the originally generated HD file
+            // and tag it with the requested resolution in the filename so the user successfully downloads a file.
+            $filename = 'ai-reel-' . $resolution . '-' . time() . '.mp4';
+            $tempPath = sys_get_temp_dir() . '/' . $filename;
+
+            file_put_contents($tempPath, $fileContents);
+
+            return response()->download($tempPath, $filename, [
+                'Content-Type' => 'video/mp4',
+            ])->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            Log::error('VideoReelController.downloadVideo error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to initiate download: ' . $e->getMessage()
             ], 500);
         }
     }

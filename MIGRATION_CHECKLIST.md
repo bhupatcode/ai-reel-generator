@@ -69,8 +69,8 @@ php artisan migrate
 
 ### 2. Verify Environment
 ```bash
-# Check REPLICATE_API_KEY is set
-grep REPLICATE_API_KEY .env
+# Check REPLICATE_API_TOKEN is set
+grep REPLICATE_API_TOKEN .env
 ```
 **Status:** ✓ Already set in .env
 
@@ -171,7 +171,7 @@ http://localhost:8000
 ### Dependencies
 - **Removed:** FFmpeg system dependency
 - **Added:** Laravel Http Client (already included)
-- **Required:** REPLICATE_API_KEY (already in .env)
+- **Required:** REPLICATE_API_TOKEN (already in .env)
 
 ---
 
@@ -253,7 +253,7 @@ Documentation ✅ Complete
 ## 📞 Support
 
 ### If Video Generation Fails
-1. Check `.env` has valid `REPLICATE_API_KEY`
+1. Check `.env` has valid `REPLICATE_API_TOKEN`
 2. Check `storage/logs/laravel.log` for errors
 3. See **REPLICATE_MIGRATION_GUIDE.md** → Troubleshooting section
 

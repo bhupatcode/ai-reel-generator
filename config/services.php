@@ -40,6 +40,10 @@ return [
     ],
     'openrouter' => [
         'key' => env('OPENROUTER_API_KEY'),
-        'endpoint' => 'https://openrouter.ai/api/v1/chat/completions', ],
+        'endpoint' => 'https://openrouter.ai/api/v1/chat/completions',
+    ],
+    'replicate' => [
+        'api_token' => env('REPLICATE_API_TOKEN'),
+    ],
 
 ];

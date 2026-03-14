@@ -431,9 +431,43 @@
                                 </div>
                             </div>
 
-                            <button onclick="copyJson()" class="btn btn-outline" style="width: 100%; margin-top: 10px; padding: 12px;">
-                                Copy Full JSON
+                            <button onclick="synthesizeVideo()" class="btn btn-primary btn-generate" style="width: 100%; margin-top: 20px; font-size: 1.1rem;">
+                                <i class="bi bi-camera-reels-fill"></i> SYNTHESIZE AI VIDEO
                             </button>
+
+                            <button onclick="copyJson()" class="btn btn-outline" style="width: 100%; margin-top: 10px; padding: 12px; border-color: var(--glass-border); color: var(--text-secondary);">
+                                <i class="bi bi-braces"></i> Copy Raw JSON
+                            </button>
+                        </div>
+                        
+                        {{-- Video Player State --}}
+                        <div id="videoPlayerState" style="display: none; width: 100%;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h4 style="color: var(--primary); margin: 0;"><i class="bi bi-check-circle-fill text-success"></i> Video Generated</h4>
+                                <button onclick="backToForm()" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.85rem;">
+                                    Start Over
+                                </button>
+                            </div>
+                            
+                            <div style="border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #000; margin-bottom: 25px; max-height: 500px; display: flex; justify-content: center;">
+                                <video id="finalVideoPlayer" controls style="max-height: 500px; max-width: 100%;"></video>
+                            </div>
+                            
+                            <h5 style="color: var(--text-light); margin-bottom: 15px;">Download Video</h5>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                <button onclick="downloadResolution('finalVideoPlayer', '144p')" class="btn btn-outline" style="flex: 1; border-color: var(--glass-border);">144p</button>
+                                <button onclick="downloadResolution('finalVideoPlayer', '240p')" class="btn btn-outline" style="flex: 1; border-color: var(--glass-border);">240p</button>
+                                <button onclick="downloadResolution('finalVideoPlayer', '360p')" class="btn btn-outline" style="flex: 1; border-color: var(--glass-border);">360p</button>
+                                <button onclick="downloadResolution('finalVideoPlayer', '720p')" class="btn btn-outline" style="flex: 1; border-color: var(--primary); color: var(--primary); font-weight: bold;">720p</button>
+                                <button onclick="downloadResolution('finalVideoPlayer', '1080p')" class="btn btn-primary" style="flex: 1;">1080p</button>
+                            </div>
+                            
+                            <!-- Hidden form to trigger download proxy -->
+                            <form id="downloadForm" method="POST" action="{{ url('api/reels/download') }}" style="display: none;">
+                                @csrf
+                                <input type="hidden" name="video_url" id="dlVideoUrl">
+                                <input type="hidden" name="resolution" id="dlResolution">
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -446,6 +480,7 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>
     let currentResult = null;
+    let pollInterval = null;
 
     document.getElementById('reelForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -528,11 +563,15 @@
     });
 
     function backToForm() {
+        if (pollInterval) clearInterval(pollInterval);
+        
         // Reset View
         document.querySelector('.input-section').classList.remove('hidden');
         document.querySelector('.form-grid').classList.remove('results-active');
         document.getElementById('contentState').style.display = 'none';
+        document.getElementById('videoPlayerState').style.display = 'none';
         document.getElementById('emptyState').style.display = 'flex';
+        document.getElementById('loader').style.display = 'none';
         document.getElementById('resultPanel').classList.remove('has-content');
         
         // Remove 'show' classes from items for next time
@@ -544,6 +583,121 @@
         if (!currentResult) return;
         navigator.clipboard.writeText(JSON.stringify(currentResult, null, 2));
         showToast('success', 'JSON copied to clipboard!');
+    }
+    
+    // Synthesize Video Pipeline
+    async function synthesizeVideo() {
+        if (!currentResult) return;
+        
+        const loader = document.getElementById('loader');
+        const contentState = document.getElementById('contentState');
+        const loaderText = loader.querySelector('p');
+        
+        // Transition UI to loader
+        contentState.style.display = 'none';
+        loaderText.innerText = 'INITIALIZING VIDEO SYNTHESIS...';
+        loader.style.display = 'flex';
+        
+        try {
+            const response = await fetch('{{ url("api/reels/create-video") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    // Adding CSRF token for web fallback if session is active
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : ''
+                },
+                body: JSON.stringify({
+                    script: currentResult.script,
+                    scenes: currentResult.scenes,
+                    captions: currentResult.captions,
+                    music: currentResult.music,
+                    duration: currentResult.duration || 15
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.prediction_id) {
+                // Begin Polling
+                loaderText.innerText = 'RENDERING SCENES. PLEASE WAIT...';
+                pollVideoStatus(data.prediction_id);
+            } else {
+                showToast('error', 'Video synthesis failed: ' + (data.error || 'Server error'));
+                contentState.style.display = 'block'; // revert
+                loader.style.display = 'none';
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('error', 'Failed to reach video generation server.');
+            contentState.style.display = 'block';
+            loader.style.display = 'none';
+        }
+    }
+    
+    function pollVideoStatus(predictionId) {
+        const loaderText = document.querySelector('#loader p');
+        let dots = 0;
+        
+        pollInterval = setInterval(async () => {
+            try {
+                // Animated dots
+                dots = (dots + 1) % 4;
+                loaderText.innerText = 'RENDERING SCENES' + '.'.repeat(dots);
+                
+                const response = await fetch(`{{ url("api/reels/video-status") }}/${predictionId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.status === 'completed' && data.video_url) {
+                        clearInterval(pollInterval);
+                        displayFinalVideo(data.video_url);
+                    } else if (data.status === 'failed') {
+                        clearInterval(pollInterval);
+                        showToast('error', 'Video rendering failed on the server.');
+                        document.getElementById('loader').style.display = 'none';
+                        document.getElementById('contentState').style.display = 'block';
+                    }
+                } else {
+                    console.log('Poll waiting for status update...');
+                }
+            } catch (err) {
+                console.error("Polling error", err);
+            }
+        }, 5000); // Check every 5 seconds
+    }
+    
+    function displayFinalVideo(videoUrl) {
+        // UI Cleanup
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('videoPlayerState').style.display = 'block';
+        
+        // Setup Video
+        const videoEl = document.getElementById('finalVideoPlayer');
+        videoEl.src = videoUrl;
+        
+        // Celebrate
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.5 },
+                colors: ['#06b6d4', '#6366f1', '#f8fafc']
+            });
+        }
+        showToast('success', 'Your AI Reel is Ready!');
+    }
+    
+    function downloadResolution(videoId, resolution) {
+        const videoEl = document.getElementById(videoId);
+        if (!videoEl.src) return;
+        
+        showToast('info', `Preparing ${resolution} download...`);
+        
+        const form = document.getElementById('downloadForm');
+        document.getElementById('dlVideoUrl').value = videoEl.src;
+        document.getElementById('dlResolution').value = resolution;
+        form.submit();
     }
 </script>
 @endsection

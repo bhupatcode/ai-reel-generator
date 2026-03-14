@@ -225,7 +225,7 @@ php artisan migrate
 
 **Required .env Variable:**
 ```dotenv
-REPLICATE_API_KEY=r8_N13EPP6q0vlKIgjStHF1Lcg4CdH4yYD0UrxER
+REPLICATE_API_TOKEN=r8_N13EPP6q0vlKIgjStHF1Lcg4CdH4yYD0UrxER
 ```
 
 **Already Present:** ✓ (configured in your .env)
@@ -245,11 +245,11 @@ php artisan migrate
 
 ### 2. Verify Replicate API Key
 
-Check that `REPLICATE_API_KEY` is set in `.env`:
+Check that `REPLICATE_API_TOKEN` is set in `.env`:
 ```bash
 php artisan tinker
 # In tinker:
-echo env('REPLICATE_API_KEY');
+echo env('REPLICATE_API_TOKEN');
 ```
 
 Expected output: Your actual API key (should start with `r8_`)
@@ -408,7 +408,7 @@ Completed response:
 **Test 1: Invalid Replicate API Key**
 ```bash
 # In .env, set wrong key temporarily
-REPLICATE_API_KEY=invalid_key_12345
+REPLICATE_API_TOKEN=invalid_key_12345
 php artisan config:clear
 ```
 Expected: "Video generation error" message
@@ -495,11 +495,11 @@ php artisan log:tail
 ## Troubleshooting
 
 ### Issue: "Video generation error: Service configuration error"
-**Cause:** REPLICATE_API_KEY not set or invalid
+**Cause:** REPLICATE_API_TOKEN not set or invalid
 **Solution:**
 ```bash
 # Check .env
-grep REPLICATE_API_KEY .env
+grep REPLICATE_API_TOKEN .env
 
 # Should show valid key starting with r8_
 ```
@@ -599,7 +599,7 @@ pollInterval = setInterval(checkStatus, 5000); // 5000ms = 5 seconds
 - [x] Created database migration
 - [x] Updated frontend JavaScript for polling
 - [x] Added comprehensive logging
-- [x] Verified REPLICATE_API_KEY in .env
+- [x] Verified REPLICATE_API_TOKEN in .env
 
 ---
 

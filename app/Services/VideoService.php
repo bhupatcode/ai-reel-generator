@@ -7,18 +7,16 @@ use Illuminate\Support\Facades\Http;
 
 class VideoService
 {
-    protected $replicateApiKey;
-    protected $replicateApiUrl = 'https://api.replicate.com/v1/predictions';
-    protected $replicateModel = 'minimax/video-01';
-    protected $replicateVersion = '6c95a8f10eade6f6f4ecb6d0c21ca63b8d69b55b38b1d02488a63cebc4b5efaf';
+    protected $replicateApiToken;
+    protected $replicateApiUrl = 'https://api.replicate.com/v1/models/minimax/video-01/predictions';
 
     public function __construct()
     {
-        $this->replicateApiKey = config('services.replicate.api_key')
-            ?? env('REPLICATE_API_KEY');
+        $this->replicateApiToken = trim(config('services.replicate.api_token')
+            ?? env('REPLICATE_API_TOKEN'));
 
-        if (!$this->replicateApiKey) {
-            Log::error('VideoService: REPLICATE_API_KEY not configured');
+        if (!$this->replicateApiToken) {
+            Log::error('VideoService: REPLICATE_API_TOKEN not configured');
         }
     }
 
@@ -26,23 +24,24 @@ class VideoService
      * Generate vertical reel video using Replicate AI
      * Returns immediately with prediction_id for async polling
      *
-     * @param array $imageUrls - Array of image URLs (must be publicly accessible)
+     * @param array $script - The AI generated script
+     * @param array $scenes - The AI generated scenes
      * @param int $duration - Video duration in seconds (15 or 30)
      * @return array - ['success' => bool, 'prediction_id' => string, 'error' => string]
      */
-    public function generateReelVideo(array $imageUrls, int $duration = 15): array
+    public function generateReelVideo(array $script, array $scenes, int $duration = 15): array
     {
         try {
             // Validate inputs
-            if (empty($imageUrls)) {
-                Log::warning('VideoService.generateReelVideo: no images provided');
+            if (empty($script) || empty($scenes)) {
+                Log::warning('VideoService.generateReelVideo: no text content provided');
                 return [
                     'success' => false,
-                    'error' => 'No images provided'
+                    'error' => 'No script or scenes provided for video generation.'
                 ];
             }
 
-            if ($duration !== 15 && $duration !== 30) {
+            if (!in_array($duration, [15, 30, 60, 90])) {
                 Log::warning('VideoService.generateReelVideo: invalid duration', ['duration' => $duration]);
                 return [
                     'success' => false,
@@ -50,44 +49,54 @@ class VideoService
                 ];
             }
 
-            if (!$this->replicateApiKey) {
-                Log::error('VideoService.generateReelVideo: Replicate API key not configured');
+            if (!$this->replicateApiToken) {
+                Log::error('VideoService.generateReelVideo: Replicate API token not configured');
                 return [
                     'success' => false,
                     'error' => 'Video service configuration error'
                 ];
             }
 
-            // Commenting out the reel creation code for now
-            /*
-            // Build the prompt for Replicate API
-            $prompt = $this->buildReelPrompt($imageUrls, $duration);
+            // Build the textual prompt for Replicate API
+            $prompt = $this->buildReelPrompt($script, $scenes, $duration);
 
             Log::info('VideoService.generateReelVideo: submitting to Replicate', [
-                'image_count' => count($imageUrls),
                 'duration' => $duration
             ]);
 
-            // Call Replicate API to generate video
-            $response = Http::withToken($this->replicateApiKey)
+            // Call Replicate API to generate video using the model endpoint
+            $response = Http::withoutVerifying()
+                ->withHeaders([
+                'Authorization' => "Token {$this->replicateApiToken}",
+            ])
                 ->post($this->replicateApiUrl, [
-                    'version' => $this->replicateVersion,
-                    'input' => [
-                        'prompt' => $prompt,
-                        'aspect_ratio' => '9:16',
-                        'duration' => $duration,
-                    ]
-                ]);
+                'input' => [
+                    'prompt' => $prompt,
+                    'prompt_optimizer' => true,
+                ]
+            ]);
 
             if (!$response->successful()) {
+                $status = $response->status();
+                $errorMsg = 'Failed to start video generation: ' . $status;
+                
+                if ($status === 401) {
+                    $errorMsg = 'Replicate API Authentication Failed: Your API key is invalid or expired. Please check your .env file.';
+                }
+
+                if ($status === 402) {
+                    $errorMsg = 'Replicate API Billing Error: Your account has run out of funds or free credits. Please check your billing at replicate.com/account/billing';
+                }
+
                 Log::error('VideoService.generateReelVideo: Replicate API failed', [
-                    'status' => $response->status(),
+                    'status' => $status,
                     'response' => $response->json(),
                     'body' => $response->body()
                 ]);
+
                 return [
                     'success' => false,
-                    'error' => 'Failed to start video generation: ' . $response->status()
+                    'error' => $errorMsg
                 ];
             }
 
@@ -109,14 +118,9 @@ class VideoService
                 'prediction_id' => $predictionId,
                 'status' => $data['status'] ?? 'starting'
             ];
-            */
 
-            return [
-                'success' => true,
-                'message' => 'Reel creation code is commented out for now.'
-            ];
-
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error('VideoService.generateReelVideo: exception', [
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -145,15 +149,18 @@ class VideoService
                 ];
             }
 
-            if (!$this->replicateApiKey) {
-                Log::error('VideoService.checkVideoStatus: Replicate API key not configured');
+            if (!$this->replicateApiToken) {
+                Log::error('VideoService.checkVideoStatus: Replicate API token not configured');
                 return [
                     'status' => 'error',
                     'error' => 'Service configuration error'
                 ];
             }
 
-            $response = Http::withToken($this->replicateApiKey)
+            $response = Http::withoutVerifying()
+                ->withHeaders([
+                'Authorization' => "Token {$this->replicateApiToken}",
+            ])
                 ->get("{$this->replicateApiUrl}/{$predictionId}");
 
             if (!$response->successful()) {
@@ -216,7 +223,8 @@ class VideoService
                 'error' => null
             ];
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             Log::error('VideoService.checkVideoStatus: exception', [
                 'prediction_id' => $predictionId,
                 'exception' => $e->getMessage()
@@ -229,19 +237,25 @@ class VideoService
     }
 
     /**
-     * Build optimized prompt for Replicate video generation
+     * Build optimized text prompt for Replicate video generation
      *
-     * @param array $imageUrls - Array of image URLs
+     * @param array $script - The AI generated script
+     * @param array $scenes - The AI generated scenes
      * @param int $duration - Duration in seconds
-     * @return string - Formatted prompt with image URLs
+     * @return string - Formatted text prompt
      */
-    private function buildReelPrompt(array $imageUrls, int $duration): string
+    private function buildReelPrompt(array $script, array $scenes, int $duration): string
     {
-        $basePrompt = "Create a 15-second vertical Instagram reel video (9:16) from the provided images with cinematic transitions, smooth camera motion, motivational style, and export as MP4 video.";
+        $basePrompt = "Synthesize a cinematic {$duration}-second vertical video (9:16 aspect ratio). Style: Highly realistic narrative sequence. Ensure smooth camera transitions between these scenes:\n\n";
 
-        // Include image URLs in the prompt for the model to use
-        $imageString = implode(' ', array_slice($imageUrls, 0, 4)); // Limit to first 4 images
+        // Inject the scene descriptions directly as the prompt
+        $sceneText = implode("\n", $scenes);
 
-        return "{$basePrompt}\n\nImages to use:\n{$imageString}";
+        $basePrompt .= $sceneText;
+
+        $basePrompt .= "\n\nAccompanying Voiceover/Script timeline:\n";
+        $basePrompt .= implode("\n", $script);
+
+        return $basePrompt;
     }
 }
