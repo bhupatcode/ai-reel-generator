@@ -323,6 +323,100 @@
                 gap: 20px; 
             }
         }
+        /* Vertical Reel Player */
+        .reel-player-container {
+            width: 360px;
+            height: 640px;
+            background: #000;
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 1px solid var(--glass-border);
+        }
+
+        .reel-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reel-slide.active {
+            opacity: 1;
+        }
+
+        .reel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1);
+            transition: transform 4s linear;
+        }
+
+        .reel-slide.active img {
+            transform: scale(1.15);
+        }
+
+        .caption-overlay {
+            position: absolute;
+            bottom: 60px;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 800;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.5);
+            z-index: 10;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            line-height: 1.2;
+        }
+
+        .reel-slide.active .caption-overlay {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .progress-bar-container {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+            z-index: 20;
+        }
+
+        .progress-segment {
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            flex: 1;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            width: 0%;
+        }
+
+        .reel-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
     </style>
 @endsection
 
@@ -361,13 +455,27 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="duration">Duration</label>
-                                <select id="duration" name="duration" class="form-select">
-                                    <option value="15">15 Seconds</option>
-                                    <option value="30">30 Seconds</option>
-                                    <option value="60">60 Seconds</option>
+                                <label for="language">Language</label>
+                                <select id="language" name="language" class="form-select">
+                                    <option value="English" selected>English</option>
+                                    <option value="Hindi">Hindi (हिंदी)</option>
+                                    <option value="Spanish">Spanish (Español)</option>
+                                    <option value="French">French (Français)</option>
+                                    <option value="German">German (Deutsch)</option>
+                                    <option value="Bhojpuri">Bhojpuri (भोजपुरी)</option>
+                                    <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                                    <option value="Marathi">Marathi (मराठी)</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 25px;">
+                            <label for="duration">Duration</label>
+                            <select id="duration" name="duration" class="form-select">
+                                <option value="15">15 Seconds</option>
+                                <option value="30">30 Seconds</option>
+                                <option value="60">60 Seconds</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -440,34 +548,31 @@
                             </button>
                         </div>
                         
-                        {{-- Video Player State --}}
+                        {{-- Video Player State (Browser Based) --}}
                         <div id="videoPlayerState" style="display: none; width: 100%;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <h4 style="color: var(--primary); margin: 0;"><i class="bi bi-check-circle-fill text-success"></i> Video Generated</h4>
+                                <h4 style="color: var(--primary); margin: 0;"><i class="bi bi-magic"></i> AI Reel Ready</h4>
                                 <button onclick="backToForm()" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.85rem;">
                                     Start Over
                                 </button>
                             </div>
                             
-                            <div style="border-radius: 20px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #000; margin-bottom: 25px; max-height: 500px; display: flex; justify-content: center;">
-                                <video id="finalVideoPlayer" controls style="max-height: 500px; max-width: 100%;"></video>
+                            <div class="reel-player-container" id="reelPlayer">
+                                {{-- Slides will be injected here --}}
+                                <div class="progress-bar-container" id="progressBar"></div>
                             </div>
-                            
-                            <h5 style="color: var(--text-light); margin-bottom: 15px;">Download Video</h5>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                <button onclick="downloadResolution('finalVideoPlayer', '144p')" class="btn btn-outline" style="flex: 1; border-color: var(--glass-border);">144p</button>
-                                <button onclick="downloadResolution('finalVideoPlayer', '240p')" class="btn btn-outline" style="flex: 1; border-color: var(--glass-border);">240p</button>
-                                <button onclick="downloadResolution('finalVideoPlayer', '360p')" class="btn btn-outline" style="flex: 1; border-color: var(--glass-border);">360p</button>
-                                <button onclick="downloadResolution('finalVideoPlayer', '720p')" class="btn btn-outline" style="flex: 1; border-color: var(--primary); color: var(--primary); font-weight: bold;">720p</button>
-                                <button onclick="downloadResolution('finalVideoPlayer', '1080p')" class="btn btn-primary" style="flex: 1;">1080p</button>
+
+                            <div class="reel-controls">
+                                <button onclick="restartReel()" class="btn btn-outline" style="flex: 1; border-color: var(--glass-border);">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Replay
+                                </button>
+                                <button id="downloadReelBtn" onclick="downloadReel()" class="btn btn-primary" style="flex: 2;">
+                                    <i class="bi bi-download"></i> DOWNLOAD REEL
+                                </button>
                             </div>
-                            
-                            <!-- Hidden form to trigger download proxy -->
-                            <form id="downloadForm" method="POST" action="{{ url('api/reels/download') }}" style="display: none;">
-                                @csrf
-                                <input type="hidden" name="video_url" id="dlVideoUrl">
-                                <input type="hidden" name="resolution" id="dlResolution">
-                            </form>
+
+                            <canvas id="recorderCanvas" width="720" height="1280" style="display: none;"></canvas>
+                            <audio id="bgMusic" loop crossorigin="anonymous"></audio>
                         </div>
                     </div>
                 </div>
@@ -480,7 +585,31 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>
     let currentResult = null;
-    let pollInterval = null;
+    let currentSlide = 0;
+    let slideInterval = null;
+    let mediaSource = null;
+    let audioCtx = null;
+    const SCENE_DURATION = 3000; // 3 seconds per scene
+
+    async function ensureAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+        }
+
+        const music = document.getElementById('bgMusic');
+        if (music && music.src && !mediaSource) {
+            try {
+                mediaSource = audioCtx.createMediaElementSource(music);
+                mediaSource.connect(audioCtx.destination);
+            } catch (e) {
+                console.warn("MediaElementSource already created or failed", e);
+            }
+        }
+    }
 
     document.getElementById('reelForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -492,7 +621,7 @@
         const resultPanel = document.getElementById('resultPanel');
 
         btn.disabled = true;
-        btn.innerHTML = 'Generating...';
+        btn.innerHTML = 'Generating Content & Images...';
         
         emptyState.style.display = 'none';
         contentState.style.display = 'none';
@@ -501,10 +630,12 @@
 
         try {
             const formData = new FormData(e.target);
-            const response = await fetch("{{ route('generate.reel') }}", {
+            const response = await fetch("{{ route('api.reels.generate') }}", {
                 method: 'POST',
-                body: formData,
+                body: JSON.stringify(Object.fromEntries(formData)),
                 headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             });
@@ -515,9 +646,9 @@
                 currentResult = data.data;
                 showToast('success', 'AI Generation Complete!');
                 
-                // Set text first (hidden)
-                document.getElementById('resScript').innerText = data.data.script;
-                document.getElementById('resScenes').innerText = data.data.scenes.join(', ');
+                // Set text
+                document.getElementById('resScript').innerText = data.data.script.join(' ');
+                document.getElementById('resScenes').innerText = data.data.scenes.join(' | ');
                 document.getElementById('resCaptions').innerText = data.data.captions.join(' | ');
                 document.getElementById('resMusic').innerText = data.data.music;
 
@@ -533,7 +664,7 @@
                 // Staggered Reveal
                 const items = ['itemScript', 'itemScenes', 'itemCaptions', 'itemMusic'];
                 for (let i = 0; i < items.length; i++) {
-                    await new Promise(r => setTimeout(r, 300));
+                    await new Promise(r => setTimeout(r, 200));
                     document.getElementById(items[i]).classList.add('show');
                 }
 
@@ -547,7 +678,7 @@
                     });
                 }
             } else {
-                showToast('error', 'Generation failed: ' + (data.error || 'Unknown error'));
+                showToast('error', 'Generation failed: ' + (data.message || 'Unknown error'));
                 loader.style.display = 'none';
                 emptyState.style.display = 'flex';
             }
@@ -558,14 +689,15 @@
             emptyState.style.display = 'flex';
         } finally {
             btn.disabled = false;
-            btn.innerHTML = 'Generate Content';
+            btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> Generate Content';
         }
     });
 
     function backToForm() {
-        if (pollInterval) clearInterval(pollInterval);
+        if (slideInterval) clearInterval(slideInterval);
+        const music = document.getElementById('bgMusic');
+        music.pause();
         
-        // Reset View
         document.querySelector('.input-section').classList.remove('hidden');
         document.querySelector('.form-grid').classList.remove('results-active');
         document.getElementById('contentState').style.display = 'none';
@@ -574,130 +706,324 @@
         document.getElementById('loader').style.display = 'none';
         document.getElementById('resultPanel').classList.remove('has-content');
         
-        // Remove 'show' classes from items for next time
         const items = ['itemScript', 'itemScenes', 'itemCaptions', 'itemMusic'];
         items.forEach(id => document.getElementById(id).classList.remove('show'));
     }
 
-    function copyJson() {
-        if (!currentResult) return;
-        navigator.clipboard.writeText(JSON.stringify(currentResult, null, 2));
-        showToast('success', 'JSON copied to clipboard!');
-    }
-    
-    // Synthesize Video Pipeline
     async function synthesizeVideo() {
         if (!currentResult) return;
         
-        const loader = document.getElementById('loader');
-        const contentState = document.getElementById('contentState');
-        const loaderText = loader.querySelector('p');
-        
-        // Transition UI to loader
-        contentState.style.display = 'none';
-        loaderText.innerText = 'INITIALIZING VIDEO SYNTHESIS...';
-        loader.style.display = 'flex';
-        
+        const btn = document.querySelector('button[onclick="synthesizeVideo()"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> SYNTHESIZING...';
+        }
+
         try {
-            const response = await fetch('{{ url("api/reels/create-video") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    // Adding CSRF token for web fallback if session is active
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : ''
-                },
-                body: JSON.stringify({
-                    script: currentResult.script,
-                    scenes: currentResult.scenes,
-                    captions: currentResult.captions,
-                    music: currentResult.music,
-                    duration: currentResult.duration || 15
-                })
-            });
+            await ensureAudioContext();
+            initSlideshow();
             
-            const data = await response.json();
-            
-            if (data.success && data.prediction_id) {
-                // Begin Polling
-                loaderText.innerText = 'RENDERING SCENES. PLEASE WAIT...';
-                pollVideoStatus(data.prediction_id);
-            } else {
-                showToast('error', 'Video synthesis failed: ' + (data.error || 'Server error'));
-                contentState.style.display = 'block'; // revert
-                loader.style.display = 'none';
+            document.getElementById('contentState').style.display = 'none';
+            document.getElementById('videoPlayerState').style.display = 'block';
+        } catch (e) {
+            console.error(e);
+            showToast('error', 'Failed to initialize reel player');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-play-circle"></i> SYNTHESIZE AI VIDEO';
             }
-        } catch (error) {
-            console.error(error);
-            showToast('error', 'Failed to reach video generation server.');
-            contentState.style.display = 'block';
-            loader.style.display = 'none';
         }
     }
-    
-    function pollVideoStatus(predictionId) {
-        const loaderText = document.querySelector('#loader p');
-        let dots = 0;
+
+    async function ensureAudioContext() {
+        const music = document.getElementById('bgMusic');
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
         
-        pollInterval = setInterval(async () => {
-            try {
-                // Animated dots
-                dots = (dots + 1) % 4;
-                loaderText.innerText = 'RENDERING SCENES' + '.'.repeat(dots);
-                
-                const response = await fetch(`{{ url("api/reels/video-status") }}/${predictionId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    if (data.status === 'completed' && data.video_url) {
-                        clearInterval(pollInterval);
-                        displayFinalVideo(data.video_url);
-                    } else if (data.status === 'failed') {
-                        clearInterval(pollInterval);
-                        showToast('error', 'Video rendering failed on the server.');
-                        document.getElementById('loader').style.display = 'none';
-                        document.getElementById('contentState').style.display = 'block';
-                    }
-                } else {
-                    console.log('Poll waiting for status update...');
+        if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
+        }
+
+        if (!mediaSource) {
+            mediaSource = audioCtx.createMediaElementSource(music);
+            mediaSource.connect(audioCtx.destination);
+        }
+    }
+
+    function initSlideshow() {
+        if (slideInterval) clearInterval(slideInterval);
+        
+        const container = document.getElementById('reelPlayer');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Remove old slides
+        container.querySelectorAll('.reel-slide').forEach(s => s.remove());
+        progressBar.innerHTML = '';
+
+        // Preload images and create slides
+        currentResult.images.forEach((url, i) => {
+            const slide = document.createElement('div');
+            slide.className = `reel-slide slide-${i}`;
+            slide.innerHTML = `
+                <img src="${url}" alt="Scene ${i+1}" crossorigin="anonymous" onerror="this.onerror=null; const keywords = '${currentResult.scenes[i]}'.split(' ').slice(0,3).join(','); this.src='https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=720&auto=format&fit=crop&sig=' + Math.random();">
+                <div class="caption-overlay">${currentResult.captions[i]}</div>
+            `;
+            container.appendChild(slide);
+
+            const segment = document.createElement('div');
+            segment.className = 'progress-segment';
+            segment.innerHTML = `<div class="progress-fill fill-${i}"></div>`;
+            progressBar.appendChild(segment);
+        });
+
+        startSlideshow();
+        
+        // Dynamic music selection
+        const music = document.getElementById('bgMusic');
+        const aiGenre = (currentResult.music || '').toLowerCase();
+        const formMood = (document.getElementById('mood').value || '').toLowerCase();
+        
+        const musicMap = {
+            'energetic': ['{{ asset("audio/energetic.mp3") }}', '{{ asset("audio/upbeat.mp3") }}'],
+            'upbeat': ['{{ asset("audio/upbeat.mp3") }}', '{{ asset("audio/energetic.mp3") }}'],
+            'epic': ['{{ asset("audio/energetic.mp3") }}', '{{ asset("audio/cinematic.mp3") }}'],
+            'tech': ['{{ asset("audio/energetic.mp3") }}', '{{ asset("audio/upbeat.mp3") }}'],
+            'electronic': ['{{ asset("audio/energetic.mp3") }}', '{{ asset("audio/upbeat.mp3") }}'],
+            'funky': ['{{ asset("audio/upbeat.mp3") }}', '{{ asset("audio/energetic.mp3") }}'],
+            'cinematic': ['{{ asset("audio/cinematic.mp3") }}', '{{ asset("audio/calm.mp3") }}'],
+            'luxury': ['{{ asset("audio/cinematic.mp3") }}'],
+            'corporate': ['{{ asset("audio/cinematic.mp3") }}', '{{ asset("audio/upbeat.mp3") }}'],
+            'inspirational': ['{{ asset("audio/cinematic.mp3") }}', '{{ asset("audio/upbeat.mp3") }}', '{{ asset("audio/calm.mp3") }}'],
+            'calm': ['{{ asset("audio/calm.mp3") }}'],
+            'relaxed': ['{{ asset("audio/calm.mp3") }}'],
+            'lofi': ['{{ asset("audio/calm.mp3") }}', '{{ asset("audio/cinematic.mp3") }}'],
+            'ambient': ['{{ asset("audio/calm.mp3") }}', '{{ asset("audio/cinematic.mp3") }}'],
+            'chillout': ['{{ asset("audio/calm.mp3") }}'],
+            'sad': ['{{ asset("audio/calm.mp3") }}', '{{ asset("audio/cinematic.mp3") }}'],
+            'happy': ['{{ asset("audio/upbeat.mp3") }}', '{{ asset("audio/energetic.mp3") }}'],
+            'motivation': ['{{ asset("audio/energetic.mp3") }}', '{{ asset("audio/upbeat.mp3") }}'],
+        };
+
+        const getRandomTrack = (tracks) => {
+            if (!tracks || tracks.length === 0) return '{{ asset("audio/cinematic.mp3") }}';
+            return tracks[Math.floor(Math.random() * tracks.length)];
+        };
+
+        // Selection priority: Form Mood > AI Genre > Default
+        // We prioritize Form Mood because the user explicitly chose it
+        let musicUrl = '{{ asset("audio/cinematic.mp3") }}';
+        
+        // Initial fallback from Form Mood
+        for (let key in musicMap) {
+            if (formMood.includes(key)) {
+                musicUrl = getRandomTrack(musicMap[key]);
+                break;
+            }
+        }
+
+        // Overwrite if AI has a very specific suggestion
+        if (aiGenre && aiGenre !== 'cinematic') {
+            for (let key in musicMap) {
+                if (aiGenre.includes(key)) {
+                    musicUrl = getRandomTrack(musicMap[key]);
+                    break;
                 }
-            } catch (err) {
-                console.error("Polling error", err);
             }
-        }, 5000); // Check every 5 seconds
-    }
-    
-    function displayFinalVideo(videoUrl) {
-        // UI Cleanup
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('videoPlayerState').style.display = 'block';
-        
-        // Setup Video
-        const videoEl = document.getElementById('finalVideoPlayer');
-        videoEl.src = videoUrl;
-        
-        // Celebrate
-        if (typeof confetti === 'function') {
-            confetti({
-                particleCount: 200,
-                spread: 100,
-                origin: { y: 0.5 },
-                colors: ['#06b6d4', '#6366f1', '#f8fafc']
-            });
         }
-        showToast('success', 'Your AI Reel is Ready!');
+        
+        music.src = musicUrl;
+        music.play().catch(e => {
+            console.log('Audio autoplay prevented, will start on user interaction');
+        });
     }
-    
-    function downloadResolution(videoId, resolution) {
-        const videoEl = document.getElementById(videoId);
-        if (!videoEl.src) return;
+
+    function startSlideshow() {
+        currentSlide = 0;
+        showSlide(currentSlide);
         
-        showToast('info', `Preparing ${resolution} download...`);
+        slideInterval = setInterval(() => {
+            currentSlide++;
+            if (currentSlide >= currentResult.images.length) {
+                currentSlide = 0;
+                // Reset progress bars
+                document.querySelectorAll('.progress-fill').forEach(f => f.style.width = '0%');
+            }
+            showSlide(currentSlide);
+        }, SCENE_DURATION);
+    }
+
+    function showSlide(index) {
+        document.querySelectorAll('.reel-slide').forEach(s => s.classList.remove('active'));
+        document.querySelector(`.slide-${index}`).classList.add('active');
         
-        const form = document.getElementById('downloadForm');
-        document.getElementById('dlVideoUrl').value = videoEl.src;
-        document.getElementById('dlResolution').value = resolution;
-        form.submit();
+        const fill = document.querySelector(`.fill-${index}`);
+        fill.style.transition = 'none';
+        fill.style.width = '0%';
+        
+        setTimeout(() => {
+            fill.style.transition = `width ${SCENE_DURATION}ms linear`;
+            fill.style.width = '100%';
+        }, 50);
+    }
+
+    function restartReel() {
+        initSlideshow();
+    }
+
+    // Clean up variables to avoid duplicates if re-inserted
+
+    async function downloadReel() {
+        const btn = document.getElementById('downloadReelBtn');
+        const music = document.getElementById('bgMusic');
+        
+        if (!music.src) {
+            showToast('error', 'Music is not loaded yet.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> CAPTURING REEL...';
+        
+        const canvas = document.getElementById('recorderCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Setup Audio Capture
+        let dest;
+        try {
+            await ensureAudioContext();
+            dest = audioCtx.createMediaStreamDestination();
+            mediaSource.connect(dest);
+        } catch (e) {
+            console.error("Audio capture failed", e);
+            showToast('warning', 'Audio capture may have issues on this browser.');
+        }
+
+        const canvasStream = canvas.captureStream(30);
+        const tracks = [...canvasStream.getVideoTracks()];
+        if (dest) tracks.push(...dest.stream.getAudioTracks());
+        
+        const combinedStream = new MediaStream(tracks);
+
+        const recorder = new MediaRecorder(combinedStream, { 
+            mimeType: 'video/webm;codecs=vp9,opus',
+            videoBitsPerSecond: 5000000 
+        });
+        
+        const chunks = [];
+
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ai-reel-${Date.now()}.webm`;
+            a.click();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-download"></i> DOWNLOAD REEL';
+            
+            // Clean up audio routing after download
+            if (dest && mediaSource) mediaSource.disconnect(dest);
+            
+            showToast('success', 'Reel downloaded successfully!');
+        };
+
+        // Restart everything for a clean recording
+        music.currentTime = 0;
+        music.play();
+        recorder.start();
+        
+        // Manual rendering loop onto canvas for the duration of the reel
+        const totalDuration = currentResult.images.length * SCENE_DURATION;
+        const startTime = Date.now();
+        
+        const images = [];
+        await Promise.all(currentResult.images.map(url => {
+            return new Promise(resolve => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => { images.push(img); resolve(); };
+                img.onerror = () => { console.error("Failed to load image", url); resolve(); };
+                img.src = url;
+            });
+        }));
+
+        const renderFrame = () => {
+            const elapsed = Date.now() - startTime;
+            if (elapsed >= totalDuration) {
+                recorder.stop();
+                music.pause();
+                return;
+            }
+
+            const frameIndex = Math.floor(elapsed / SCENE_DURATION);
+            const slideElapsed = elapsed % SCENE_DURATION;
+            const progress = slideElapsed / SCENE_DURATION;
+            const img = images[frameIndex % images.length];
+
+            // Clear canvas
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            if (img) {
+                // Apply Zoom effect on canvas
+                const scale = 1 + (progress * 0.15);
+                const w = canvas.width * scale;
+                const h = canvas.height * scale;
+                const x = (canvas.width - w) / 2;
+                const y = (canvas.height - h) / 2;
+                ctx.drawImage(img, x, y, w, h);
+            }
+
+            // Draw Caption Background (Semi translucent gradient)
+            const grad = ctx.createLinearGradient(0, canvas.height - 300, 0, canvas.height);
+            grad.addColorStop(0, 'transparent');
+            grad.addColorStop(1, 'rgba(0,0,0,0.7)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, canvas.height - 300, canvas.width, 300);
+
+            // Draw Caption
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 45px Arial';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0,0,0,0.8)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+            
+            const caption = currentResult.captions[frameIndex % currentResult.captions.length];
+            if (caption) {
+                const words = caption.split(' ');
+                let line = '';
+                let yPos = canvas.height - 150;
+                let lines = [];
+                
+                for (let n = 0; n < words.length; n++) {
+                    let testLine = line + words[n] + ' ';
+                    let metrics = ctx.measureText(testLine);
+                    if (metrics.width > canvas.width - 100 && n > 0) {
+                        lines.push(line);
+                        line = words[n] + ' ';
+                    } else {
+                        line = testLine;
+                    }
+                }
+                lines.push(line);
+                
+                // Adjustment for multiple lines
+                yPos -= (lines.length - 1) * 30;
+                lines.forEach(l => {
+                    ctx.fillText(l.trim(), canvas.width/2, yPos);
+                    yPos += 55;
+                });
+            }
+
+            requestAnimationFrame(renderFrame);
+        };
+
+        renderFrame();
     }
 </script>
 @endsection

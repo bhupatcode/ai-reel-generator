@@ -45,5 +45,9 @@ return [
     'replicate' => [
         'api_token' => env('REPLICATE_API_TOKEN'),
     ],
+    'huggingface' => [
+        'key' => env('HUGGINGFACE_API_KEY'),
+        'image_model' => env('HF_IMAGE_MODEL', 'stabilityai/stable-diffusion-xl-base-1.0'),
+    ],
 
 ];

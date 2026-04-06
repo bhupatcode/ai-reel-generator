@@ -22,17 +22,8 @@ Route::middleware('api')->group(function () {
         Route::post('/reels/generate', [ReelController::class , 'generate'])->name('api.reels.generate');
         Route::post('/reels/process', [ReelProductionController::class , 'process'])->name('api.reels.process');
 
-        // Video creation (Replicate async)
-        Route::post('/reels/create-video', [\App\Http\Controllers\VideoReelController::class , 'createVideo'])->name('api.reels.create-video');
-
-        // Check video generation status
-        Route::get('/reels/video-status/{predictionId}', [\App\Http\Controllers\VideoReelController::class , 'checkVideoStatus'])->name('api.reels.video-status');
-
-        // Video Download (Proxy)
-        Route::post('/reels/download', [\App\Http\Controllers\VideoReelController::class , 'downloadVideo'])->name('api.reels.download');
-
         // Reel management
+        Route::get('/reels', [ReelController::class , 'index'])->name('api.reels.index');
         Route::get('/reels/{id}', [ReelController::class , 'show'])->name('api.reels.show');
-        Route::get('/reels', [\App\Http\Controllers\VideoReelController::class , 'list'])->name('api.reels.list');
-        Route::delete('/reels/{id}', [\App\Http\Controllers\VideoReelController::class , 'delete'])->name('api.reels.delete');
+        Route::delete('/reels/{id}', [ReelController::class , 'delete'])->name('api.reels.delete');
     });

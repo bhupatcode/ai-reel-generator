@@ -21,9 +21,9 @@ class OpenRouterService
         }
     }
 
-    public function generateReel(string $topic, string $mood, int $duration): array
+    public function generateReel(string $topic, string $mood, int $duration, string $language = 'English'): array
     {
-        $prompt = $this->buildPrompt($topic, $mood, $duration);
+        $prompt = $this->buildPrompt($topic, $mood, $duration, $language);
 
         try {
             $response = Http::withoutVerifying()
@@ -78,16 +78,20 @@ class OpenRouterService
         return $this->parseJsonResponse($text);
     }
 
-    protected function buildPrompt(string $topic, string $mood, int $duration): string
+    protected function buildPrompt(string $topic, string $mood, int $duration, string $language): string
     {
         return "Generate JSON for a {$duration}s video about: {$topic}
 Mood: {$mood}
+Language: {$language}
+
+Provide a compelling, creative, and professional script.
+IMPORTANT: Ensure each scene is visually unique and highly detailed.
 
 {
-  \"script\": [5 lines],
-  \"scenes\": [5 descriptions],
-  \"captions\": [5 captions],
-  \"music\": \"genre\"
+  \"script\": [7 lines in {$language}, each continuing the story],
+  \"scenes\": [7 highly detailed, visually distinct, and unique descriptions in English for image generation. Include specific lighting, backgrounds, and artistic styles for each.],
+  \"captions\": [7 engaging and punchy captions in {$language}],
+  \"music\": \"specific sub-genre or music style matching the mood\"
 }
 
 Return ONLY valid JSON. No markdown.";

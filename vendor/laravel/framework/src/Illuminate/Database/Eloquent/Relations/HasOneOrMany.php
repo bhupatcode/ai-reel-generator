@@ -204,6 +204,10 @@ abstract class HasOneOrMany extends Relation
         foreach ($results as $key => $item) {
             $pairKey = $this->getDictionaryKey($item->{$foreign});
 
+            if ($pairKey === null) {
+                continue;
+            }
+
             if ($isAssociative) {
                 $dictionary[$pairKey][$key] = $item;
             } else {
@@ -272,6 +276,8 @@ abstract class HasOneOrMany extends Relation
      * @param  array  $attributes
      * @param  (\Closure(): array)|array  $values
      * @return TRelatedModel
+     *
+     * @throws \Illuminate\Database\UniqueConstraintViolationException
      */
     public function createOrFirst(array $attributes = [], Closure|array $values = [])
     {

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Reel;
 use App\Services\OpenRouterService;
+use App\Services\ImageGenerationService;
+use App\Services\ReelProductionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -47,31 +49,49 @@ class ReelController extends Controller
     public function generate(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'topic' => 'required|string|max:200',
-            'mood' => 'required|string',
-            'duration' => 'required|integer|in:15,30,60,90',
+            'topic' => 'required|string|max:255',
+            'mood' => 'required|string|max:100',
+            'language' => 'required|string|max:50',
+            'duration' => 'required|integer|min:5|max:60',
         ]);
 
         $reel = Reel::create([
-            'topic' => $validated['topic'],
-            'mood' => $validated['mood'],
-            'duration' => (int)$validated['duration'],
+                'topic' => $validated['topic'],
+                'mood' => $validated['mood'],
+                'language' => $validated['language'],
+                'duration' => $validated['duration'],
             'status' => 'pending',
         ]);
 
         try {
             $ai = new OpenRouterService();
+            $imageService = new ImageGenerationService();
+            $productionService = new ReelProductionService();
 
             $aiResult = $ai->generateReel(
                 $validated['topic'],
                 $validated['mood'],
-                (int)$validated['duration']
+                (int)$validated['duration'],
+                $validated['language']
             );
 
+            $script = $aiResult['script'] ?? [];
+            $scenes = $aiResult['scenes'] ?? [];
+            $captions = $aiResult['captions'] ?? [];
+            
+            // Generate images for each scene
+            $imageUrls = [];
+            foreach ($scenes as $scene) {
+                // Generate a more descriptive prompt for the image
+                $imagePrompt = $productionService->processReelData(['scenes' => [$scene]])['image_prompts'][0];
+                $imageUrls[] = $imageService->generateFromPrompt($imagePrompt);
+            }
+
             $reel->update([
-                'script' => $aiResult['script'] ?? [],
-                'scenes' => $aiResult['scenes'] ?? [],
-                'captions' => $aiResult['captions'] ?? [],
+                'script' => $script,
+                'scenes' => $scenes,
+                'captions' => $captions,
+                'images' => $imageUrls,
                 'music' => $aiResult['music'] ?? '',
                 'raw_response' => json_encode($aiResult),
                 'status' => 'completed',
@@ -89,6 +109,7 @@ class ReelController extends Controller
                     'script' => $reel->script,
                     'scenes' => $reel->scenes,
                     'captions' => $reel->captions,
+                    'images' => $reel->images,
                     'music' => $reel->music,
                 ],
             ]);
@@ -105,6 +126,32 @@ class ReelController extends Controller
                 'success' => false,
                 'message' => 'Reel generation failed: ' . $e->getMessage(),
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function delete(int $id): JsonResponse
+    {
+        try {
+            $reel = Reel::find($id);
+
+            if (!$reel) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Reel not found',
+                ], 404);
+            }
+
+            $reel->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reel deleted successfully',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete reel: ' . $e->getMessage(),
             ], 500);
         }
     }

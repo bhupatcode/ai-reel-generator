@@ -14,6 +14,7 @@ class Reel extends Model
     protected $fillable = [
         'topic',
         'mood',
+        'language',
         'duration',
         'script',
         'scenes',
@@ -23,6 +24,7 @@ class Reel extends Model
         'raw_response',
         'status',
         'prediction_id',
+        'images',
     ];
 
     /**
@@ -37,6 +39,7 @@ class Reel extends Model
             'scenes' => 'array',
             'captions' => 'array',
             'duration' => 'integer',
+            'images' => 'array',
         ];
     }
 }
